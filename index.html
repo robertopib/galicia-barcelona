@@ -650,7 +650,7 @@ footer a{color:var(--muted)}
 
 <footer>
   Itinerario v2 · O Grove → Sant Cugat · 1–9 de septiembre de 2026 · Ford Ranger + Across Premium 432CDL<br>
-  Guardado compartido entre dispositivos · <b>build 6</b>
+  Guardado compartido entre dispositivos · <b>build 7</b>
 </footer>
 
 </main>
@@ -669,6 +669,8 @@ footer a{color:var(--muted)}
 
   var API='https://api.jsonbin.io/v3/b/', PFX='gb26:', TS='gb26:__ts';
   var _rawSet=localStorage.setItem.bind(localStorage);
+  // guardado explícito (no dependemos de interceptar localStorage.setItem, que Safari a veces ignora)
+  window.gbStore=function(k,v){try{_rawSet(k,v);}catch(e){}};  // fallback: solo local
 
   function pj(s){try{return JSON.parse(s);}catch(e){return null;}}
   function setStatus(t){var el=document.getElementById('syncStatus');if(el)el.textContent=t;}
@@ -741,7 +743,7 @@ footer a{color:var(--muted)}
     });
   }
   function schedulePush(){if(pushT)clearTimeout(pushT);setStatus('… guardando');pushT=setTimeout(function(){pushT=null;syncNow('push');},600);}
-  localStorage.setItem=function(k,v){_rawSet(k,v);if(String(k).indexOf(PFX)===0&&k!==TS){META[k]=Date.now();saveMeta();schedulePush();}};
+  window.gbStore=function(k,v){_rawSet(k,v);if(String(k).indexOf(PFX)===0&&k!==TS){META[k]=Date.now();saveMeta();schedulePush();}};
   window.GBSYNC.push=function(){if(pushT){clearTimeout(pushT);pushT=null;}return syncNow('push');};
   window.GBSYNC.pull=function(){return syncNow('pull');};
   if(btn)btn.addEventListener('click',function(){syncNow('pull');});
@@ -760,7 +762,7 @@ footer a{color:var(--muted)}
   // ---------- persistent checkboxes ----------
   var PFX='gb26:';
   function get(k){try{return localStorage.getItem(PFX+k)==='1';}catch(e){return false;}}
-  function set(k,v){try{localStorage.setItem(PFX+k,v?'1':'0');}catch(e){}}
+  function set(k,v){window.gbStore(PFX+k,v?'1':'0');}
   var dayKeys=['d1','d2','d3','d4','d5','d6','d7','d8','d9'];
 
   function applyDayState(key,checked){
@@ -959,20 +961,20 @@ footer a{color:var(--muted)}
     lab.appendChild(cb); lab.appendChild(box); lab.appendChild(txt);
     cb.addEventListener('change',function(){
       if(cb.checked)checked[it.id]=1; else delete checked[it.id];
-      localStorage.setItem(P.chk+it.id, cb.checked?'1':'0'); row.classList.toggle('done',cb.checked);
+      window.gbStore(P.chk+it.id, cb.checked?'1':'0'); row.classList.toggle('done',cb.checked);
       updateHeader(cat); updateOverall();
     });
     var edit=document.createElement('input'); edit.type='text'; edit.className='cledit'; edit.value=it.t; edit.maxLength=80; edit.setAttribute('aria-label','Editar elemento');
     function saveEdit(){
       var v=edit.value.trim(); if(!v){edit.value=it.t;return;}
-      it.t=v; txt.textContent=v; overrides[it.id]=v; localStorage.setItem(P.ovr+it.id, v);
+      it.t=v; txt.textContent=v; overrides[it.id]=v; window.gbStore(P.ovr+it.id, v);
     }
     edit.addEventListener('blur',saveEdit);
     edit.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();edit.blur();}});
     var del=document.createElement('button'); del.type='button'; del.className='cldel'; del.title='Eliminar'; del.textContent='×';
     del.addEventListener('click',function(){
-      deleted[it.id]=1; localStorage.setItem(P.del+it.id,'1');
-      if(checked[it.id]){delete checked[it.id]; localStorage.setItem(P.chk+it.id,'0');}
+      deleted[it.id]=1; window.gbStore(P.del+it.id,'1');
+      if(checked[it.id]){delete checked[it.id]; window.gbStore(P.chk+it.id,'0');}
       if(/^c\d/.test(it.id)){custom[cat.id]=(custom[cat.id]||[]).filter(function(x){return x.id!==it.id;});}
       row.parentNode.removeChild(row); updateHeader(cat); updateOverall();
     });
@@ -1001,7 +1003,7 @@ footer a{color:var(--muted)}
     function doAdd(){
       var v=inp.value.trim(); if(!v)return;
       var id='c'+Date.now()+Math.floor(Math.random()*1000);
-      custom[cat.id]=(custom[cat.id]||[]); custom[cat.id].push({id:id,t:v}); localStorage.setItem(P.cus+id, JSON.stringify({cat:cat.id,t:v}));
+      custom[cat.id]=(custom[cat.id]||[]); custom[cat.id].push({id:id,t:v}); window.gbStore(P.cus+id, JSON.stringify({cat:cat.id,t:v}));
       var node=makeItem(cat,{id:id,t:v}); body.insertBefore(node,add);
       inp.value=''; inp.focus(); updateHeader(cat); updateOverall();
     }
@@ -1031,12 +1033,12 @@ footer a{color:var(--muted)}
   hideBox.addEventListener('change',function(){hideDone=hideBox.checked; LS.set(K.hide,hideDone); host.classList.toggle('cl-hide',hideDone);});
   document.getElementById('clReset').addEventListener('click',function(){
     if(!confirm('¿Seguro querés desmarcar todo el checklist?'))return;
-    Object.keys(checked).forEach(function(id){localStorage.setItem(P.chk+id,'0');});
+    Object.keys(checked).forEach(function(id){window.gbStore(P.chk+id,'0');});
     checked={}; render();
   });
   document.getElementById('clRestore').addEventListener('click',function(){
     if(!confirm('¿Recuperar los elementos de fábrica que borraste?'))return;
-    Object.keys(deleted).forEach(function(id){if(!/^c\d/.test(id)){delete deleted[id];localStorage.setItem(P.del+id,'0');}});
+    Object.keys(deleted).forEach(function(id){if(!/^c\d/.test(id)){delete deleted[id];window.gbStore(P.del+id,'0');}});
     render();
   });
   document.getElementById('clPrint').addEventListener('click',function(){window.print();});
