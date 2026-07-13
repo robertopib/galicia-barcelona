@@ -697,9 +697,10 @@ footer a{color:var(--muted)}
       .then(function(r){return r.ok?r.json():null;})
       .then(function(data){
         if(data&&typeof data==='object'){
-          var rk=Object.keys(data), local=snapshot();
-          if(rk.length===0&&Object.keys(local).length>0){doPush();return;}
-          if(differs(data)){applyRemote(data);location.reload();return;}
+          var clean={};Object.keys(data).forEach(function(k){if(k.indexOf(PFX)===0)clean[k]=data[k];});
+          var rk=Object.keys(clean), local=snapshot();
+          if(rk.length===0){if(Object.keys(local).length>0)doPush();else setStatus('✓ al día');return;}
+          if(differs(clean)){applyRemote(clean);location.reload();return;}
         }
         setStatus('✓ al día');
       })
