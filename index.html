@@ -21,7 +21,7 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;font-family:'Inter',system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+body{margin:0;font-family:'Inter',system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 h1,h2,h3{font-family:'Fraunces',Georgia,serif;line-height:1.15;letter-spacing:-.01em}
 a{color:var(--ocean);font-weight:600;text-decoration:none}
 a:hover{text-decoration:underline}
@@ -73,6 +73,9 @@ section{scroll-margin-top:78px}
 .progress-lbl{font-weight:700;color:var(--ocean-deep);white-space:nowrap}
 .progress-reset{font-size:13px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:5px 10px;cursor:pointer}
 .progress-reset:hover{background:var(--soft)}
+.cal-reset{text-align:right;margin:10px 0 0}
+.cal-reset button{font-size:12px;opacity:.5}
+.cal-reset button:hover{opacity:1}
 
 /* ---- checkbox ---- */
 .chk{position:relative;display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-weight:600}
@@ -235,6 +238,9 @@ footer a{color:var(--muted)}
   .nav-pills{margin-left:0}
   #map{height:360px}
   .day-head .dh-right{margin-left:0;order:3;width:100%;justify-content:space-between}
+  /* evitar el zoom automático de iOS al enfocar inputs (font-size < 16px) */
+  .claddrow input,.clitem .cledit{font-size:16px}
+  .cltext,.plan,.t-desc{overflow-wrap:anywhere}
 }
 </style>
 </head>
@@ -246,7 +252,6 @@ footer a{color:var(--muted)}
     <span class="nav-days" id="proglbl">0 / 9 días</span>
     <span class="nav-status" id="syncStatus"></span>
     <button class="nav-btn" id="syncBtn" type="button" title="Sincronizar ahora">🔄</button>
-    <button class="nav-btn" id="resetBtn" type="button" title="Reiniciar los días marcados">↺</button>
   </div>
   <div class="nav-pills">
     <a href="#d1" data-nav="d1"><b>1</b>mar</a>
@@ -349,6 +354,7 @@ footer a{color:var(--muted)}
     <div class="body"><span class="badge">🏁 Vuelta a casa</span><div class="sleep">🌙 <b>Sant Cugat del Vallès</b></div><div class="drive">🚐 436 km · ~4 h 40</div><div class="plan">Visita breve a Olite y regreso a casa.</div><span class="go">Ver el día →</span></div>
   </div>
 </section>
+<p class="cal-reset"><button class="progress-reset" id="resetBtn" type="button">↺ Reiniciar días marcados</button></p>
 
 <!-- ============ MAPA ============ -->
 <h2 class="section-title"><span class="ic">🗺️</span>Mapa de la ruta</h2>
@@ -684,21 +690,21 @@ footer a{color:var(--muted)}
      - cl:custom  -> unión por id, quitando los que estén en deleted
      - cl:over    -> unión (local gana en conflicto)
      - cl:checked -> gana la local */
-  function merge(remote,local){
+  /* Gana la copia "winner" para las claves sueltas (checks, días, reservas, renombrados);
+     los añadidos/borrados de items siempre se fusionan (unión + tombstones), gane quien gane.
+     -> al SUBIR usamos winner=local (mandan mis checks); al BAJAR winner=remote (recibo los de otros). */
+  function mergeKeys(winner,loser){
     var out={};
-    Object.keys(remote).forEach(function(x){out[x]=remote[x];});
-    Object.keys(local).forEach(function(x){out[x]=local[x];});
-    var rDel=pj(remote['gb26:cl:deleted'])||{}, lDel=pj(local['gb26:cl:deleted'])||{}, mDel={};
-    Object.keys(rDel).forEach(function(x){mDel[x]=1;}); Object.keys(lDel).forEach(function(x){mDel[x]=1;});
-    var rCus=pj(remote['gb26:cl:custom'])||{}, lCus=pj(local['gb26:cl:custom'])||{}, mCus={};
+    Object.keys(loser).forEach(function(x){out[x]=loser[x];});
+    Object.keys(winner).forEach(function(x){out[x]=winner[x];});
+    var mDel={},a=pj(loser['gb26:cl:deleted'])||{},b=pj(winner['gb26:cl:deleted'])||{};
+    Object.keys(a).forEach(function(x){mDel[x]=1;}); Object.keys(b).forEach(function(x){mDel[x]=1;});
+    var mCus={};
     function addC(src){Object.keys(src).forEach(function(cat){mCus[cat]=mCus[cat]||[];var seen={};mCus[cat].forEach(function(it){seen[it.id]=1;});(src[cat]||[]).forEach(function(it){if(it&&it.id&&!seen[it.id]){mCus[cat].push(it);seen[it.id]=1;}});});}
-    addC(rCus); addC(lCus);
+    addC(pj(loser['gb26:cl:custom'])||{}); addC(pj(winner['gb26:cl:custom'])||{});
     Object.keys(mCus).forEach(function(cat){mCus[cat]=mCus[cat].filter(function(it){return !mDel[it.id];});if(!mCus[cat].length)delete mCus[cat];});
-    var rOv=pj(remote['gb26:cl:over'])||{}, lOv=pj(local['gb26:cl:over'])||{}, mOv={};
-    Object.keys(rOv).forEach(function(x){mOv[x]=rOv[x];}); Object.keys(lOv).forEach(function(x){mOv[x]=lOv[x];});
     if(Object.keys(mDel).length)out['gb26:cl:deleted']=JSON.stringify(mDel);else delete out['gb26:cl:deleted'];
     if(Object.keys(mCus).length)out['gb26:cl:custom']=JSON.stringify(mCus);else delete out['gb26:cl:custom'];
-    if(Object.keys(mOv).length)out['gb26:cl:over']=JSON.stringify(mOv);else delete out['gb26:cl:over'];
     return out;
   }
 
@@ -725,7 +731,7 @@ footer a{color:var(--muted)}
   function doPush(){
     setStatus('… guardando');
     return fetchRemote().then(function(remote){
-      return rawPut(merge(remote,snapshot())).then(function(r){setStatus(r.ok?'✓ guardado':'⚠ error al guardar');});
+      return rawPut(mergeKeys(snapshot(),remote)).then(function(r){setStatus(r.ok?'✓ guardado':'⚠ error al guardar');});
     }).catch(function(){
       return rawPut(snapshot()).then(function(){setStatus('✓ guardado');}).catch(function(){setStatus('⚠ sin conexión');});
     });
@@ -737,7 +743,7 @@ footer a{color:var(--muted)}
   function pull(){
     setStatus('… sincronizando');
     return fetchRemote().then(function(remote){
-      var local=snapshot(), merged=merge(remote,local);
+      var local=snapshot(), merged=mergeKeys(remote,local);
       if(differsObj(merged,remote))rawPut(merged);
       if(differsObj(merged,local)){applyRemote(merged);location.reload();return;}
       setStatus('✓ al día');
