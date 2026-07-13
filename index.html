@@ -674,8 +674,33 @@ footer a{color:var(--muted)}
     del.forEach(function(x){localStorage.removeItem(x);});
     Object.keys(obj).forEach(function(x){_rawSet(x,obj[x]);});
   }
-  function differs(remote){var l=snapshot(),lk=Object.keys(l),rk=Object.keys(remote);if(lk.length!==rk.length)return true;for(var i=0;i<rk.length;i++)if(l[rk[i]]!==remote[rk[i]])return true;return false;}
+  function differsObj(a,b){var ak=Object.keys(a),bk=Object.keys(b);if(ak.length!==bk.length)return true;for(var i=0;i<ak.length;i++)if(a[ak[i]]!==b[ak[i]])return true;return false;}
   function setStatus(t){var el=document.getElementById('syncStatus');if(el)el.textContent=t;}
+  function pj(s){try{return JSON.parse(s);}catch(e){return null;}}
+
+  /* Fusiona nube (remote) + local sin perder datos:
+     - claves sueltas (días, reservas): gana la local (es quien hace el cambio)
+     - cl:deleted -> unión (tombstones: una vez borrado, queda borrado)
+     - cl:custom  -> unión por id, quitando los que estén en deleted
+     - cl:over    -> unión (local gana en conflicto)
+     - cl:checked -> gana la local */
+  function merge(remote,local){
+    var out={};
+    Object.keys(remote).forEach(function(x){out[x]=remote[x];});
+    Object.keys(local).forEach(function(x){out[x]=local[x];});
+    var rDel=pj(remote['gb26:cl:deleted'])||{}, lDel=pj(local['gb26:cl:deleted'])||{}, mDel={};
+    Object.keys(rDel).forEach(function(x){mDel[x]=1;}); Object.keys(lDel).forEach(function(x){mDel[x]=1;});
+    var rCus=pj(remote['gb26:cl:custom'])||{}, lCus=pj(local['gb26:cl:custom'])||{}, mCus={};
+    function addC(src){Object.keys(src).forEach(function(cat){mCus[cat]=mCus[cat]||[];var seen={};mCus[cat].forEach(function(it){seen[it.id]=1;});(src[cat]||[]).forEach(function(it){if(it&&it.id&&!seen[it.id]){mCus[cat].push(it);seen[it.id]=1;}});});}
+    addC(rCus); addC(lCus);
+    Object.keys(mCus).forEach(function(cat){mCus[cat]=mCus[cat].filter(function(it){return !mDel[it.id];});if(!mCus[cat].length)delete mCus[cat];});
+    var rOv=pj(remote['gb26:cl:over'])||{}, lOv=pj(local['gb26:cl:over'])||{}, mOv={};
+    Object.keys(rOv).forEach(function(x){mOv[x]=rOv[x];}); Object.keys(lOv).forEach(function(x){mOv[x]=lOv[x];});
+    if(Object.keys(mDel).length)out['gb26:cl:deleted']=JSON.stringify(mDel);else delete out['gb26:cl:deleted'];
+    if(Object.keys(mCus).length)out['gb26:cl:custom']=JSON.stringify(mCus);else delete out['gb26:cl:custom'];
+    if(Object.keys(mOv).length)out['gb26:cl:over']=JSON.stringify(mOv);else delete out['gb26:cl:over'];
+    return out;
+  }
 
   window.GBSYNC={enabled:false,push:function(){},pull:function(){}};
   var btn=document.getElementById('syncBtn');
@@ -687,31 +712,36 @@ footer a{color:var(--muted)}
   }
   window.GBSYNC.enabled=true;
 
+  function rawPut(obj){
+    return fetch(API+BIN_ID,{method:'PUT',keepalive:true,headers:{'Content-Type':'application/json','X-Access-Key':ACCESS_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(obj)});
+  }
+  function fetchRemote(){
+    return fetch(API+BIN_ID+'/latest',{headers:{'X-Access-Key':ACCESS_KEY,'X-Bin-Meta':'false'}})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(data){var clean={};if(data&&typeof data==='object')Object.keys(data).forEach(function(k){if(k.indexOf(PFX)===0)clean[k]=data[k];});return clean;});
+  }
+
   var pushT=null;
   function doPush(){
     setStatus('… guardando');
-    fetch(API+BIN_ID,{method:'PUT',keepalive:true,headers:{'Content-Type':'application/json','X-Access-Key':ACCESS_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(snapshot())})
-      .then(function(r){setStatus(r.ok?'✓ guardado':'⚠ error al guardar');})
-      .catch(function(){setStatus('⚠ sin conexión');});
+    return fetchRemote().then(function(remote){
+      return rawPut(merge(remote,snapshot())).then(function(r){setStatus(r.ok?'✓ guardado':'⚠ error al guardar');});
+    }).catch(function(){
+      return rawPut(snapshot()).then(function(){setStatus('✓ guardado');}).catch(function(){setStatus('⚠ sin conexión');});
+    });
   }
-  function schedulePush(){if(pushT)clearTimeout(pushT);setStatus('… guardando');pushT=setTimeout(doPush,1200);}
+  function schedulePush(){if(pushT)clearTimeout(pushT);setStatus('… guardando');pushT=setTimeout(doPush,1000);}
   localStorage.setItem=function(k,v){_rawSet(k,v);if(String(k).indexOf(PFX)===0)schedulePush();};
-  window.GBSYNC.push=doPush;
+  window.GBSYNC.push=function(){if(pushT){clearTimeout(pushT);pushT=null;}return doPush();};
 
   function pull(){
     setStatus('… sincronizando');
-    return fetch(API+BIN_ID+'/latest',{headers:{'X-Access-Key':ACCESS_KEY,'X-Bin-Meta':'false'}})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(data){
-        if(data&&typeof data==='object'){
-          var clean={};Object.keys(data).forEach(function(k){if(k.indexOf(PFX)===0)clean[k]=data[k];});
-          var rk=Object.keys(clean), local=snapshot();
-          if(rk.length===0){if(Object.keys(local).length>0)doPush();else setStatus('✓ al día');return;}
-          if(differs(clean)){applyRemote(clean);location.reload();return;}
-        }
-        setStatus('✓ al día');
-      })
-      .catch(function(){setStatus('⚠ sin conexión');});
+    return fetchRemote().then(function(remote){
+      var local=snapshot(), merged=merge(remote,local);
+      if(differsObj(merged,remote))rawPut(merged);
+      if(differsObj(merged,local)){applyRemote(merged);location.reload();return;}
+      setStatus('✓ al día');
+    }).catch(function(){setStatus('⚠ sin conexión');});
   }
   window.GBSYNC.pull=pull;
   if(btn)btn.addEventListener('click',pull);
@@ -881,7 +911,7 @@ footer a{color:var(--muted)}
   function findCat(id){for(var i=0;i<GROUPS.length;i++){var cs=GROUPS[i].cats;for(var j=0;j<cs.length;j++)if(cs[j].id===id)return cs[j];}return null;}
   function itemsOf(cat){
     var base=cat.items.filter(function(it){return !deleted[it[0]];}).map(function(it){return {id:it[0],t:(overrides[it[0]]||it[1])};});
-    var cust=(custom[cat.id]||[]).map(function(x){return {id:x.id,t:(overrides[x.id]||x.t)};});
+    var cust=(custom[cat.id]||[]).filter(function(x){return !deleted[x.id];}).map(function(x){return {id:x.id,t:(overrides[x.id]||x.t)};});
     return base.concat(cust);
   }
   function counts(cat){var it=itemsOf(cat),d=it.filter(function(i){return checked[i.id];}).length;return {done:d,total:it.length};}
@@ -920,9 +950,8 @@ footer a{color:var(--muted)}
     edit.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();edit.blur();}});
     var del=document.createElement('button'); del.type='button'; del.className='cldel'; del.title='Eliminar'; del.textContent='×';
     del.addEventListener('click',function(){
-      if(!confirm('¿Eliminar «'+it.t+'»?'))return;
+      deleted[it.id]=1; LS.set(K.deleted,deleted);
       if(/^c\d/.test(it.id)){custom[cat.id]=(custom[cat.id]||[]).filter(function(x){return x.id!==it.id;}); LS.set(K.custom,custom);}
-      else{deleted[it.id]=1; LS.set(K.deleted,deleted);}
       if(overrides[it.id]){delete overrides[it.id]; LS.set(K.over,overrides);}
       delete checked[it.id]; LS.set(K.checked,checked);
       row.parentNode.removeChild(row); updateHeader(cat); updateOverall();
@@ -984,8 +1013,9 @@ footer a{color:var(--muted)}
     checked={}; LS.set(K.checked,checked); render();
   });
   document.getElementById('clRestore').addEventListener('click',function(){
-    if(!confirm('¿Recuperar los elementos que borraste?'))return;
-    deleted={}; LS.set(K.deleted,deleted); render();
+    if(!confirm('¿Recuperar los elementos de fábrica que borraste?'))return;
+    Object.keys(deleted).forEach(function(id){if(!/^c\d/.test(id))delete deleted[id];});
+    LS.set(K.deleted,deleted); render();
   });
   document.getElementById('clPrint').addEventListener('click',function(){window.print();});
   var editBtn=document.getElementById('clEdit');
@@ -993,6 +1023,7 @@ footer a{color:var(--muted)}
     var on=host.classList.toggle('cl-edit');
     host.classList.toggle('cl-editing',on);
     editBtn.textContent=on?'✓ Listo':'✏️ Editar';
+    if(!on&&window.GBSYNC&&window.GBSYNC.push)window.GBSYNC.push();
   });
 })();
 </script>
