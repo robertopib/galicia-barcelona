@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<title>Itinerario v1.1 O Grove - Sant Cugat</title>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#f6f7fb;color:#1f2937;line-height:1.5}
+header{background:linear-gradient(135deg,#123a75,#1f5fbf);color:#fff;padding:32px 24px}
+header h1{margin:0 0 8px}main{max-width:1120px;margin:auto;padding:22px}
+.box,.day{background:#fff;border:1px solid #d8dee9;border-radius:14px;padding:18px;margin:18px 0;box-shadow:0 2px 10px #0000000a}
+.final{border-left:6px solid #267a3e;background:#e9f7ef}.warn{border-left:6px solid #d89400;background:#fff8df}
+a{color:#1f5fbf;font-weight:bold}table{width:100%;border-collapse:collapse;font-size:14px}td,th{border:1px solid #d8dee9;padding:9px;vertical-align:top}th{background:#eef3ff;text-align:left}
+.logic{background:#f8fafc;border-left:4px solid #1f5fbf;padding:10px 12px;border-radius:8px}
+.routes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}.route{border:1px solid #d8dee9;border-radius:12px;padding:12px}.caravan{background:#eef5ff}.ranger{background:#eefaf1}.still{background:#f8fafc}
+.corrected{background:#fff3cd;border:1px solid #ffe69c;border-radius:10px;padding:12px}
+@media(max-width:800px){main{padding:12px}.routes{grid-template-columns:1fr}table,tbody,tr,td{display:block}tr{margin-bottom:10px}}
+</style>
+</head>
+<body>
+<header>
+<h1>Itinerario v1.1: O Grove → Sant Cugat</h1>
+<p>Ford Ranger + Across Premium 432CDL · 4 adultos · 2 perros · 1–9 de septiembre.</p>
+</header>
+<main>
+
+<section class="box warn"><b>Confirmar siempre:</b> acceso y pernocta con caravana remolcada, posibilidad de desenganchar, perros, longitud total y maniobra, especialmente en Parking A575, Covadonga y Txingudi.</section>
+<section class="box"><h2>Mapas generales</h2><ul>
+<li><a href="https://www.google.com/maps/dir/?api=1&amp;origin=O+Grove,+Pontevedra,+Espa%C3%B1a&amp;destination=Parking+Covadonga,+Cangas+de+On%C3%ADs,+Asturias,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Camping+Perbes,+Mi%C3%B1o,+A+Coru%C3%B1a,+Espa%C3%B1a|Playa+del+Silencio,+Asturias,+Espa%C3%B1a|Cudillero,+Asturias,+Espa%C3%B1a|Gij%C3%B3n,+Asturias,+Espa%C3%B1a" target="_blank">Tramo 1: O Grove → Perbes → Gijón → Covadonga</a></li>
+<li><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Parking+Covadonga,+Cangas+de+On%C3%ADs,+Asturias,+Espa%C3%B1a&amp;destination=Autocaravan+Park+Txingudi,+Irun,+Gipuzkoa,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Camping+Santillana,+Santillana+del+Mar,+Cantabria,+Espa%C3%B1a|Santander,+Cantabria,+Espa%C3%B1a|Bilbao,+Bizkaia,+Espa%C3%B1a" target="_blank">Tramo 2: Covadonga → Santillana → Txingudi</a></li>
+<li><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Autocaravan+Park+Txingudi,+Irun,+Gipuzkoa,+Espa%C3%B1a&amp;destination=Sant+Cugat+del+Vall%C3%A8s,+Barcelona,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Vitoria-Gasteiz,+%C3%81lava,+Espa%C3%B1a|Pamplona,+Navarra,+Espa%C3%B1a|Olite,+Navarra,+Espa%C3%B1a" target="_blank">Tramo 3: Txingudi → Vitoria → Pamplona → Olite → Sant Cugat</a></li>
+</ul></section>
+<section class="box"><h2>Resumen</h2><table><thead><tr><th>Día</th><th>Dónde se duerme</th><th>Plan principal</th></tr></thead><tbody>
+<tr><td><a href="#d1">1 septiembre</a></td><td>Camping Perbes</td><td>O Grove, llegada al camping, Redes y Betanzos.</td></tr>
+<tr><td><a href="#d2">2 septiembre</a></td><td><b>Parking Covadonga</b></td><td>Ruta costera hacia Gijón, paseo rápido y traslado nocturno a Covadonga.</td></tr>
+<tr><td><a href="#d3">3 septiembre</a></td><td>Parking Covadonga</td><td>Lagos, santuario y Cangas de Onís.</td></tr>
+<tr><td><a href="#d4">4 septiembre</a></td><td>Camping Santillana</td><td>Covadonga–Santillana, Comillas y Santillana del Mar.</td></tr>
+<tr><td><a href="#d5">5 septiembre</a></td><td>Camping Santillana</td><td>Potes, Mogrovejo y Fuente Dé.</td></tr>
+<tr><td><a href="#d6">6 septiembre</a></td><td>Autocaravan Park Txingudi</td><td>Santander, Bilbao y llegada a Txingudi.</td></tr>
+<tr><td><a href="#d7">7 septiembre</a></td><td>Autocaravan Park Txingudi</td><td>Hondarribia, San Sebastián, Zumaia y San Telmo.</td></tr>
+<tr><td><a href="#d8">8 septiembre</a></td><td>Parking caravanas Olite</td><td>Vitoria-Gasteiz, Pamplona y traslado nocturno a Olite.</td></tr>
+<tr><td><a href="#d9">9 septiembre</a></td><td>Sant Cugat del Vallès</td><td>Visita breve a Olite y regreso a casa.</td></tr>
+</tbody></table></section>
+<section class="day" id="d1"><h2>Día 1 — 1 septiembre</h2><p><b>Dormir:</b> Camping Perbes</p><p class="logic"><b>Lógica:</b> Primera etapa corta para instalar la caravana y dedicar la tarde a Redes y Betanzos.</p>
+<div class="routes"><div class="route caravan"><b>🚐 O Grove → Camping Perbes</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=O+Grove,+Pontevedra,+Espa%C3%B1a&amp;destination=Camping+Perbes,+Mi%C3%B1o,+A+Coru%C3%B1a,+Espa%C3%B1a&amp;travelmode=driving" target="_blank">Abrir en Google Maps</a></div><div class="route ranger"><b>🚙 Perbes → Redes → Betanzos → Perbes</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Camping+Perbes,+Mi%C3%B1o,+A+Coru%C3%B1a,+Espa%C3%B1a&amp;destination=Camping+Perbes,+Mi%C3%B1o,+A+Coru%C3%B1a,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Redes,+A+Coru%C3%B1a,+Espa%C3%B1a|Betanzos,+A+Coru%C3%B1a,+Espa%C3%B1a" target="_blank">Abrir en Google Maps</a></div></div>
+<table><tr><td>12:00</td><td>Salida de O Grove.</td></tr><tr><td>16:00</td><td>Llegada aproximada al camping e instalación.</td></tr><tr><td>18:00–22:00</td><td>Redes y Betanzos.</td></tr></table><p><b>Base:</b> Camping Perbes.</p></section>
+<section class="day" id="d2"><h2>Día 2 — 2 septiembre</h2><p><b>Dormir:</b> Parking Covadonga</p><p class="corrected"><b>Corrección confirmada:</b> Gijón es una parada, no la base nocturna. Después del paseo se continúa hacia Covadonga para amanecer allí.</p>
+<p class="logic"><b>Lógica:</b> Avanzar por la costa asturiana durante el día, hacer una visita breve a Gijón y completar por la noche el traslado hasta Covadonga.</p>
+<div class="routes"><div class="route caravan"><b>🚐 Perbes → Playa del Silencio → Cudillero → Gijón</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Camping+Perbes,+Mi%C3%B1o,+A+Coru%C3%B1a,+Espa%C3%B1a&amp;destination=Parking+A575,+Gij%C3%B3n,+Asturias,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Playa+del+Silencio,+Asturias,+Espa%C3%B1a|Cudillero,+Asturias,+Espa%C3%B1a" target="_blank">Abrir en Google Maps</a></div><div class="route caravan"><b>🚐 Gijón → Parking Covadonga</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Gij%C3%B3n,+Asturias,+Espa%C3%B1a&amp;destination=Parking+Covadonga,+Cangas+de+On%C3%ADs,+Asturias,+Espa%C3%B1a&amp;travelmode=driving" target="_blank">Abrir en Google Maps</a></div></div>
+<table><tr><td>10:00–16:00</td><td>Camping Perbes → Gijón, con posibles paradas en Playa del Silencio y Cudillero.</td></tr><tr><td>18:00–20:00</td><td>Paseo rápido por Gijón.</td></tr><tr><td>22:00–23:00</td><td>Traslado Gijón → Covadonga.</td></tr><tr><td>23:00</td><td>Llegada y pernocta en Parking Covadonga.</td></tr></table>
+<p><b>Nota:</b> Las paradas costeras son opcionales y deben ajustarse al tiempo real de conducción con caravana.</p></section>
+<section class="day" id="d3"><h2>Día 3 — 3 septiembre</h2><p><b>Dormir:</b> Parking Covadonga</p><p class="logic"><b>Lógica:</b> Amanecer ya en Covadonga permite dedicar el día completo a los lagos, el santuario y Cangas de Onís.</p>
+<div class="routes"><div class="route ranger"><b>🚙 Covadonga → Lagos → Santuario → Cangas de Onís → Covadonga</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Parking+Covadonga,+Cangas+de+On%C3%ADs,+Asturias,+Espa%C3%B1a&amp;destination=Parking+Covadonga,+Cangas+de+On%C3%ADs,+Asturias,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Lagos+de+Covadonga,+Asturias,+Espa%C3%B1a|Santuario+de+Covadonga,+Asturias,+Espa%C3%B1a|Cangas+de+On%C3%ADs,+Asturias,+Espa%C3%B1a" target="_blank">Abrir en Google Maps</a></div><div class="route still"><b>🏕️ Caravana quieta</b><br/>Segunda noche en Covadonga.</div></div>
+<table><tr><td>10:00–17:00</td><td>Lagos y santuario de Covadonga.</td></tr><tr><td>18:00–21:30</td><td>Cangas de Onís.</td></tr><tr><td>22:00</td><td>Regreso al parking.</td></tr></table></section>
+<section class="day" id="d4"><h2>Día 4 — 4 septiembre</h2><p><b>Dormir:</b> Camping Santillana</p><p class="logic"><b>Lógica:</b> Cambio de base a Cantabria y tarde centrada en Comillas y Santillana del Mar.</p>
+<div class="routes"><div class="route caravan"><b>🚐 Covadonga → Camping Santillana</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Parking+Covadonga,+Cangas+de+On%C3%ADs,+Asturias,+Espa%C3%B1a&amp;destination=Camping+Santillana,+Santillana+del+Mar,+Cantabria,+Espa%C3%B1a&amp;travelmode=driving" target="_blank">Abrir en Google Maps</a></div><div class="route ranger"><b>🚙 Santillana → Comillas → Santillana</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Camping+Santillana,+Santillana+del+Mar,+Cantabria,+Espa%C3%B1a&amp;destination=Camping+Santillana,+Santillana+del+Mar,+Cantabria,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Comillas,+Cantabria,+Espa%C3%B1a|Santillana+del+Mar,+Cantabria,+Espa%C3%B1a" target="_blank">Abrir en Google Maps</a></div></div>
+<table><tr><td>10:00–15:00</td><td>Covadonga → Santillana.</td></tr><tr><td>16:00–18:00</td><td>Comillas.</td></tr><tr><td>19:00–21:00</td><td>Santillana del Mar.</td></tr><tr><td>22:00</td><td>Regreso al camping.</td></tr></table></section>
+<section class="day" id="d5"><h2>Día 5 — 5 septiembre</h2><p><b>Dormir:</b> Camping Santillana</p><p class="logic"><b>Lógica:</b> Excursión de día completo a Liébana y Fuente Dé, dejando la caravana en Santillana.</p>
+<div class="routes"><div class="route still"><b>🏕️ Caravana quieta</b><br/>Segunda noche en Camping Santillana.</div><div class="route ranger"><b>🚙 Santillana → Potes → Mogrovejo → Fuente Dé → Santillana</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Camping+Santillana,+Santillana+del+Mar,+Cantabria,+Espa%C3%B1a&amp;destination=Camping+Santillana,+Santillana+del+Mar,+Cantabria,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Potes,+Cantabria,+Espa%C3%B1a|Mogrovejo,+Cantabria,+Espa%C3%B1a|Fuente+D%C3%A9,+Cantabria,+Espa%C3%B1a" target="_blank">Abrir en Google Maps</a></div></div>
+<table><tr><td>10:00–15:00</td><td>Ruta hacia Fuente Dé con paradas rápidas en Potes y Mogrovejo.</td></tr><tr><td>15:00–17:00</td><td>Fuente Dé.</td></tr><tr><td>19:00–21:00</td><td>Regreso a Santillana.</td></tr></table></section>
+<section class="day" id="d6"><h2>Día 6 — 6 septiembre</h2><p><b>Dormir:</b> Autocaravan Park Txingudi</p><p class="logic"><b>Lógica:</b> Jornada de traslado con visitas urbanas a Santander y Bilbao antes de llegar a la nueva base.</p>
+<div class="routes"><div class="route caravan"><b>🚐 Santillana → Santander → Bilbao → Txingudi</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Camping+Santillana,+Santillana+del+Mar,+Cantabria,+Espa%C3%B1a&amp;destination=Autocaravan+Park+Txingudi,+Irun,+Gipuzkoa,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Santander,+Cantabria,+Espa%C3%B1a|Bilbao,+Bizkaia,+Espa%C3%B1a" target="_blank">Abrir en Google Maps</a></div><div class="route still"><b>🚐 Jornada con caravana</b><br/>Las visitas deben hacerse con aparcamiento apto para el conjunto.</div></div>
+<table><tr><td>10:00–11:00</td><td>Santillana → Santander.</td></tr><tr><td>11:00–14:00</td><td>Santander.</td></tr><tr><td>14:00–16:00</td><td>Santander → Bilbao.</td></tr><tr><td>16:00–19:00</td><td>Bilbao.</td></tr><tr><td>19:00–21:00</td><td>Bilbao → Txingudi.</td></tr></table></section>
+<section class="day" id="d7"><h2>Día 7 — 7 septiembre</h2><p><b>Dormir:</b> Autocaravan Park Txingudi</p><p class="logic"><b>Lógica:</b> Día completo sin mover la caravana por la costa guipuzcoana.</p>
+<div class="routes"><div class="route still"><b>🏕️ Caravana quieta</b><br/>Segunda noche en Txingudi.</div><div class="route ranger"><b>🚙 Txingudi → Hondarribia → San Sebastián → Zumaia → San Telmo → Txingudi</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Autocaravan+Park+Txingudi,+Irun,+Gipuzkoa,+Espa%C3%B1a&amp;destination=Autocaravan+Park+Txingudi,+Irun,+Gipuzkoa,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Hondarribia,+Gipuzkoa,+Espa%C3%B1a|San+Sebasti%C3%A1n,+Gipuzkoa,+Espa%C3%B1a|Zumaia,+Gipuzkoa,+Espa%C3%B1a|Ermita+de+San+Telmo,+Zumaia,+Gipuzkoa,+Espa%C3%B1a" target="_blank">Abrir en Google Maps</a></div></div>
+<table><tr><td>10:00–11:00</td><td>Txingudi → Hondarribia.</td></tr><tr><td>11:00–20:00</td><td>Hondarribia, San Sebastián, Zumaia y San Telmo.</td></tr><tr><td>20:00–21:00</td><td>Regreso a Txingudi.</td></tr></table></section>
+<section class="day" id="d8"><h2>Día 8 — 8 septiembre</h2><p><b>Dormir:</b> Parking caravanas Olite</p><p class="logic"><b>Lógica:</b> Visitar Vitoria y Pamplona durante el día y desplazarse a Olite al final de la jornada.</p>
+<div class="routes"><div class="route caravan"><b>🚐 Txingudi → Vitoria-Gasteiz → Pamplona → Olite</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Autocaravan+Park+Txingudi,+Irun,+Gipuzkoa,+Espa%C3%B1a&amp;destination=Olite,+Navarra,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Vitoria-Gasteiz,+%C3%81lava,+Espa%C3%B1a|Pamplona,+Navarra,+Espa%C3%B1a" target="_blank">Abrir en Google Maps</a></div><div class="route still"><b>🚐 Jornada con caravana</b><br/>Prever aparcamientos exteriores y accesibles.</div></div>
+<table><tr><td>10:00–11:00</td><td>Txingudi → Vitoria-Gasteiz.</td></tr><tr><td>11:00–14:00</td><td>Vitoria-Gasteiz.</td></tr><tr><td>15:00–16:00</td><td>Vitoria-Gasteiz → Pamplona.</td></tr><tr><td>17:00–21:00</td><td>Pamplona.</td></tr><tr><td>22:00–23:00</td><td>Pamplona → Olite.</td></tr><tr><td>23:00</td><td>Pernocta en Parking caravanas Olite.</td></tr></table></section>
+<section class="day" id="d9"><h2>Día 9 — 9 septiembre</h2><p><b>Dormir:</b> Sant Cugat del Vallès</p><p class="logic"><b>Lógica:</b> Visita breve a Olite por la mañana y regreso directo a casa.</p>
+<div class="routes"><div class="route ranger"><b>🚙 Visita a Olite</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Parking+caravanas+Olite,+Navarra,+Espa%C3%B1a&amp;destination=Parking+caravanas+Olite,+Navarra,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Palacio+Real+de+Olite,+Navarra,+Espa%C3%B1a" target="_blank">Abrir en Google Maps</a></div><div class="route caravan"><b>🚐 Olite → Sant Cugat</b><br/><a href="https://www.google.com/maps/dir/?api=1&amp;origin=Olite,+Navarra,+Espa%C3%B1a&amp;destination=Sant+Cugat+del+Vall%C3%A8s,+Barcelona,+Espa%C3%B1a&amp;travelmode=driving" target="_blank">Abrir en Google Maps</a></div></div>
+<table><tr><td>10:00–13:00</td><td>Olite.</td></tr><tr><td>13:00–17:00</td><td>Olite → Sant Cugat.</td></tr></table></section>
+
+</main>
+</body>
+</html>
