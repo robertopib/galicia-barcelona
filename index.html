@@ -134,6 +134,40 @@ section{scroll-margin-top:78px}
 .clcol h3{margin:0 0 10px;font-size:16px;display:flex;align-items:center;gap:8px}
 .clcol .chk{display:flex;width:100%;padding:6px 0;font-weight:500;font-size:14px;align-items:flex-start}
 .clcol .chk input:checked ~ .cltext{color:var(--muted);text-decoration:line-through}
+/* dynamic checklist */
+.cl-toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.cl-toggle{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);font-weight:600;cursor:pointer;user-select:none}
+.cl-group-title{font-family:'Fraunces',serif;font-weight:700;font-size:19px;color:var(--ocean-deep);margin:26px 0 10px}
+.clhead{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}
+.clhead h3{margin:0}
+.clprog{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;font-weight:700}
+.clmini{width:56px;height:6px;background:var(--soft);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.clmini i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--ocean));width:0;transition:width .3s}
+.clchev{display:inline-block;transition:transform .15s;transform:rotate(90deg);color:var(--muted)}
+.clcol.collapsed .clchev{transform:rotate(0)}
+.clcol.collapsed .clbody{display:none}
+.clbody{margin-top:12px}
+.clitem{display:flex;align-items:center;gap:8px;padding:5px 0}
+.clitem .clchk{flex:1;width:auto;padding:0;font-weight:500;font-size:14px;align-items:center}
+.clitem.done .cltext{color:var(--muted);text-decoration:line-through}
+.cldel{flex:none;width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;opacity:.45;transition:.15s}
+.cldel:hover{opacity:1;border-color:var(--coral);color:var(--coral)}
+.claddrow{display:flex;gap:8px;margin-top:12px}
+.claddrow input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;font-size:13px}
+.claddrow input:focus{outline:none;border-color:var(--ocean)}
+.cladd{flex:none;border:1px solid var(--ocean);background:var(--ocean);color:#fff;border-radius:8px;padding:7px 13px;font-weight:600;cursor:pointer;font-size:13px}
+.cladd:hover{background:var(--ocean-deep)}
+.cl-hide .clitem.done{display:none}
+@media print{
+  body *{visibility:hidden}
+  #print-root,#print-root *{visibility:visible}
+  #print-root{position:absolute;left:0;top:0;width:100%;padding:0 12px}
+  .cl-toolbar,.cldel,.claddrow,.clchev,.section-sub{display:none!important}
+  .clcol{break-inside:avoid;box-shadow:none;border-color:#999;margin-bottom:10px}
+  .clcol.collapsed .clbody{display:block!important}
+  .checklist{grid-template-columns:1fr 1fr;gap:10px}
+  .cl-group-title{margin-top:14px}
+}
 
 /* ---- day sections ---- */
 .day{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:0;margin:22px 0;box-shadow:var(--shadow-sm);overflow:hidden;transition:opacity .2s}
@@ -359,61 +393,20 @@ footer a{color:var(--muted)}
 </section>
 
 <!-- ============ CHECKLIST ============ -->
-<h2 class="section-title"><span class="ic">🧳</span>Checklist de equipaje</h2>
-<p class="section-sub">Se guarda automáticamente en tu navegador. Úsalo para no olvidar nada antes de salir.</p>
-<section class="checklist">
-  <div class="clcol">
-    <h3>📄 Documentación</h3>
-    <label class="chk dark"><input type="checkbox" data-check="pk-doc1"><span class="cbx"></span><span class="cltext">DNI / pasaportes</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-doc2"><span class="cbx"></span><span class="cltext">Permiso de conducir</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-doc3"><span class="cbx"></span><span class="cltext">Permiso circulación + ficha técnica (coche y caravana)</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-doc4"><span class="cbx"></span><span class="cltext">Seguros al día (coche + caravana)</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-doc5"><span class="cbx"></span><span class="cltext">Tarjeta sanitaria</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-doc6"><span class="cbx"></span><span class="cltext">Reservas y contactos anotados</span></label>
-  </div>
-  <div class="clcol">
-    <h3>🚐 Coche y caravana</h3>
-    <label class="chk dark"><input type="checkbox" data-check="pk-car1"><span class="cbx"></span><span class="cltext">Presión neumáticos y frenos revisados</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-car2"><span class="cbx"></span><span class="cltext">Rueda de repuesto + gato</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-car3"><span class="cbx"></span><span class="cltext">Triángulos / balizas + chalecos</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-car4"><span class="cbx"></span><span class="cltext">Cuñas de nivelación y calzos</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-car5"><span class="cbx"></span><span class="cltext">Espejos de remolque</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-car6"><span class="cbx"></span><span class="cltext">Mangueras de agua + cable eléctrico y adaptadores</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-car7"><span class="cbx"></span><span class="cltext">Producto WC químico + kit herramientas</span></label>
-  </div>
-  <div class="clcol">
-    <h3>🐕 Perros</h3>
-    <label class="chk dark"><input type="checkbox" data-check="pk-dog1"><span class="cbx"></span><span class="cltext">Cartilla veterinaria + microchip</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-dog2"><span class="cbx"></span><span class="cltext">Antiparasitarios al día</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-dog3"><span class="cbx"></span><span class="cltext">Comida + comederos + agua de viaje</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-dog4"><span class="cbx"></span><span class="cltext">Correas, arneses y bozales</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-dog5"><span class="cbx"></span><span class="cltext">Camas / mantas y toalla</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-dog6"><span class="cbx"></span><span class="cltext">Bolsas para excrementos</span></label>
-  </div>
-  <div class="clcol">
-    <h3>🍳 Cocina y camping</h3>
-    <label class="chk dark"><input type="checkbox" data-check="pk-cmp1"><span class="cbx"></span><span class="cltext">Bombona de gas + menaje</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-cmp2"><span class="cbx"></span><span class="cltext">Nevera / hielo</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-cmp3"><span class="cbx"></span><span class="cltext">Agua potable de reserva</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-cmp4"><span class="cbx"></span><span class="cltext">Sillas, mesa y toldo</span></label>
-  </div>
-  <div class="clcol">
-    <h3>🧥 Ropa y personal</h3>
-    <label class="chk dark"><input type="checkbox" data-check="pk-per1"><span class="cbx"></span><span class="cltext">Chubasquero / cortavientos (norte lluvioso)</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-per2"><span class="cbx"></span><span class="cltext">Calzado cómodo / de senderismo</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-per3"><span class="cbx"></span><span class="cltext">Bañadores y toallas</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-per4"><span class="cbx"></span><span class="cltext">Botiquín + medicación</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-per5"><span class="cbx"></span><span class="cltext">Protección solar y gorra</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-per6"><span class="cbx"></span><span class="cltext">Cargadores + power bank</span></label>
-  </div>
-  <div class="clcol">
-    <h3>🥾 Excursiones</h3>
-    <label class="chk dark"><input type="checkbox" data-check="pk-exc1"><span class="cbx"></span><span class="cltext">Mochila de día</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-exc2"><span class="cbx"></span><span class="cltext">Bastones de senderismo</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-exc3"><span class="cbx"></span><span class="cltext">Prismáticos</span></label>
-    <label class="chk dark"><input type="checkbox" data-check="pk-exc4"><span class="cbx"></span><span class="cltext">Cámara / móvil con espacio libre</span></label>
-  </div>
-</section>
+<div id="print-root">
+<h2 class="section-title"><span class="ic">🧳</span>Checklist del viaje</h2>
+<p class="section-sub">Equipaje por tipo y rutinas por momento. Marca, añade y borra lo que quieras; se guarda en tu navegador y lo puedes reutilizar en el próximo viaje.</p>
+<div class="box cl-toolbar">
+  <span style="font-size:20px">🧳</span>
+  <div class="progress-track"><div class="progress-fill" id="clbar"></div></div>
+  <span class="progress-lbl" id="cllbl">0 / 0 completados</span>
+  <label class="cl-toggle"><input type="checkbox" id="clHide"> Ocultar completados</label>
+  <button class="progress-reset" id="clReset" type="button">Reiniciar</button>
+  <button class="progress-reset" id="clRestore" type="button">Restaurar borrados</button>
+  <button class="progress-reset" id="clPrint" type="button">🖨️ Imprimir</button>
+</div>
+<div id="checklist"></div>
+</div>
 
 <!-- ============ DETALLE DÍA A DÍA ============ -->
 <h2 class="section-title"><span class="ic">📍</span>Detalle día a día</h2>
@@ -723,6 +716,177 @@ footer a{color:var(--muted)}
     });
     map.fitBounds(group,{padding:[40,40]});
   }
+})();
+
+// ---------- dynamic checklist engine ----------
+(function(){
+  var LS={
+    get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},
+    set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  };
+  var K={checked:'gb26:cl:checked',deleted:'gb26:cl:deleted',custom:'gb26:cl:custom',collapsed:'gb26:cl:collapsed',hide:'gb26:cl:hide'};
+  var checked=LS.get(K.checked,{}), deleted=LS.get(K.deleted,{}), custom=LS.get(K.custom,{}),
+      collapsed=LS.get(K.collapsed,{}), hideDone=LS.get(K.hide,false);
+
+  var GROUPS=[
+   {g:'🎒 Equipaje',cats:[
+     {id:'imp',name:'🚨 Imprescindibles',items:[
+       ['imp1','Reservas y contactos anotados'],['imp2','Permiso de conducir'],
+       ['imp3','Permiso de circulación (coche)'],['imp4','Permiso de circulación (caravana)'],
+       ['imp5','Ficha técnica (coche)'],['imp6','Ficha técnica (caravana)'],
+       ['imp7','Seguro del coche en vigor'],['imp8','Seguro de la caravana en vigor'],
+       ['imp9','Tarjeta sanitaria / europea'],['imp10','Dinero y tarjetas']
+     ]},
+     {id:'car',name:'🚐 Enganche y caravana',items:[
+       ['car1','Bola de enganche'],['car2','Cadenas / cable de seguridad'],
+       ['car3','Portamatrículas del remolque'],['car4','Cable eléctrico de conexión'],
+       ['car5','Adaptadores eléctricos (CEE / Schuko)'],['car6','Manguera de agua limpia'],
+       ['car7','Cuñas de nivelación'],['car8','Calzos de rueda'],
+       ['car9','Gato / patas estabilizadoras'],['car10','Espejos de remolque'],
+       ['car11','Extintor'],['car12','Botiquín de la caravana'],
+       ['car13','Kit de herramientas'],['car14','Producto WC químico'],
+       ['car15','Aguas grises y negras vaciadas'],['car16','Nivel de bombona de gas comprobado']
+     ]},
+     {id:'dog',name:'🐕 Perros',items:[
+       ['dog1','Cartilla veterinaria + microchip'],['dog2','Antiparasitarios al día'],
+       ['dog3','Comida'],['dog4','Comederos y bebedero de viaje'],
+       ['dog5','Correas y arneses'],['dog6','Bozales'],
+       ['dog7','Camas / mantas'],['dog8','Toalla'],['dog9','Bolsas para excrementos']
+     ]},
+     {id:'cmp',name:'🍳 Cocina y camping',items:[
+       ['cmp1','Bombona de gas'],['cmp2','Menaje y utensilios'],['cmp3','Nevera / hielo'],
+       ['cmp4','Agua potable de reserva'],['cmp5','Sillas y mesa'],['cmp6','Toldo']
+     ]},
+     {id:'per',name:'🧥 Ropa y excursiones',items:[
+       ['per1','Chubasquero / cortavientos (norte lluvioso)'],['per2','Calzado de senderismo'],
+       ['per3','Bañadores y toallas'],['per4','Botiquín personal + medicación'],
+       ['per5','Protección solar y gorra'],['per6','Power bank + cargadores'],
+       ['per7','Mochila de día'],['per8','Bastones de senderismo'],['per9','Prismáticos']
+     ]}
+   ]},
+   {g:'🔁 Rutinas del viaje',cats:[
+     {id:'home',name:'🏠 Antes de salir de casa',items:[
+       ['home1','Depósito de agua limpia lleno'],['home2','Nevera cargada y enchufada'],
+       ['home3','Ventanas y claraboyas cerradas'],['home4','Objetos sueltos guardados'],
+       ['home5','Gas cerrado'],['home6','Perros: paseo y agua antes de salir']
+     ]},
+     {id:'hitch',name:'🔗 Al enganchar y antes de arrancar',items:[
+       ['h1','Caravana enganchada y bola bloqueada'],['h2','Cadenas / cable de seguridad puestos'],
+       ['h3','Cable de luces conectado'],['h4','Luces e intermitentes del remolque probados'],
+       ['h5','Freno de mano de la caravana quitado'],['h6','Patas estabilizadoras subidas'],
+       ['h7','Calzos de rueda retirados'],['h8','Retrovisores de remolque ajustados'],
+       ['h9','Cierres, altura y toldo revisados'],['h10','Presión de neumáticos correcta']
+     ]},
+     {id:'arrive',name:'🏕️ Al llegar al camping',items:[
+       ['a1','Nivelar con cuñas'],['a2','Bajar patas estabilizadoras'],
+       ['a3','Calzos en las ruedas'],['a4','Conectar agua y electricidad'],['a5','Toldo y sillas fuera']
+     ]}
+   ]}
+  ];
+
+  var host=document.getElementById('checklist');
+  if(!host) return;
+
+  function findCat(id){for(var i=0;i<GROUPS.length;i++){var cs=GROUPS[i].cats;for(var j=0;j<cs.length;j++)if(cs[j].id===id)return cs[j];}return null;}
+  function itemsOf(cat){
+    var base=cat.items.filter(function(it){return !deleted[it[0]];}).map(function(it){return {id:it[0],t:it[1]};});
+    return base.concat(custom[cat.id]||[]);
+  }
+  function counts(cat){var it=itemsOf(cat),d=it.filter(function(i){return checked[i.id];}).length;return {done:d,total:it.length};}
+
+  function updateHeader(cat){
+    var c=counts(cat),col=host.querySelector('.clcol[data-cat="'+cat.id+'"]');
+    if(!col)return;
+    col.querySelector('.clprog-num').textContent=c.done+'/'+c.total;
+    col.querySelector('.clmini i').style.width=(c.total?Math.round(c.done/c.total*100):0)+'%';
+  }
+  function updateOverall(){
+    var done=0,total=0;
+    GROUPS.forEach(function(gr){gr.cats.forEach(function(cat){var c=counts(cat);done+=c.done;total+=c.total;});});
+    document.getElementById('clbar').style.width=(total?Math.round(done/total*100):0)+'%';
+    document.getElementById('cllbl').textContent=done+' / '+total+' completados';
+  }
+
+  function makeItem(cat,it){
+    var row=document.createElement('div'); row.className='clitem'+(checked[it.id]?' done':'');
+    var lab=document.createElement('label'); lab.className='chk dark clchk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!checked[it.id];
+    var box=document.createElement('span'); box.className='cbx';
+    var txt=document.createElement('span'); txt.className='cltext'; txt.textContent=it.t;
+    lab.appendChild(cb); lab.appendChild(box); lab.appendChild(txt);
+    cb.addEventListener('change',function(){
+      if(cb.checked)checked[it.id]=1; else delete checked[it.id];
+      LS.set(K.checked,checked); row.classList.toggle('done',cb.checked);
+      updateHeader(cat); updateOverall();
+    });
+    var del=document.createElement('button'); del.type='button'; del.className='cldel'; del.title='Eliminar'; del.textContent='×';
+    del.addEventListener('click',function(){
+      if(/^c\d/.test(it.id)){custom[cat.id]=(custom[cat.id]||[]).filter(function(x){return x.id!==it.id;}); LS.set(K.custom,custom);}
+      else{deleted[it.id]=1; LS.set(K.deleted,deleted);}
+      delete checked[it.id]; LS.set(K.checked,checked);
+      row.parentNode.removeChild(row); updateHeader(cat); updateOverall();
+    });
+    row.appendChild(lab); row.appendChild(del);
+    return row;
+  }
+
+  function makeCat(cat){
+    var c=counts(cat);
+    var col=document.createElement('div'); col.className='clcol'+(collapsed[cat.id]?' collapsed':''); col.dataset.cat=cat.id;
+    var head=document.createElement('div'); head.className='clhead';
+    var h3=document.createElement('h3'); h3.textContent=cat.name;
+    var prog=document.createElement('div'); prog.className='clprog';
+    prog.innerHTML='<span class="clprog-num"></span><span class="clmini"><i></i></span><span class="clchev">▸</span>';
+    head.appendChild(h3); head.appendChild(prog);
+    head.addEventListener('click',function(){
+      var now=!col.classList.contains('collapsed'); col.classList.toggle('collapsed',now);
+      if(now)collapsed[cat.id]=1; else delete collapsed[cat.id]; LS.set(K.collapsed,collapsed);
+    });
+    col.appendChild(head);
+    var body=document.createElement('div'); body.className='clbody';
+    itemsOf(cat).forEach(function(it){body.appendChild(makeItem(cat,it));});
+    var add=document.createElement('div'); add.className='claddrow';
+    var inp=document.createElement('input'); inp.type='text'; inp.placeholder='+ Añadir…'; inp.maxLength=80;
+    var btn=document.createElement('button'); btn.type='button'; btn.className='cladd'; btn.textContent='Añadir';
+    function doAdd(){
+      var v=inp.value.trim(); if(!v)return;
+      var id='c'+Date.now()+Math.floor(Math.random()*1000);
+      custom[cat.id]=(custom[cat.id]||[]); custom[cat.id].push({id:id,t:v}); LS.set(K.custom,custom);
+      var node=makeItem(cat,{id:id,t:v}); body.insertBefore(node,add);
+      inp.value=''; inp.focus(); updateHeader(cat); updateOverall();
+    }
+    btn.addEventListener('click',doAdd);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();doAdd();}});
+    add.appendChild(inp); add.appendChild(btn); body.appendChild(add);
+    col.appendChild(body);
+    prog.querySelector('.clprog-num').textContent=c.done+'/'+c.total;
+    prog.querySelector('.clmini i').style.width=(c.total?Math.round(c.done/c.total*100):0)+'%';
+    return col;
+  }
+
+  function render(){
+    host.innerHTML='';
+    GROUPS.forEach(function(gr){
+      var gt=document.createElement('div'); gt.className='cl-group-title'; gt.textContent=gr.g; host.appendChild(gt);
+      var grid=document.createElement('div'); grid.className='checklist'; host.appendChild(grid);
+      gr.cats.forEach(function(cat){grid.appendChild(makeCat(cat));});
+    });
+    host.classList.toggle('cl-hide',hideDone);
+    updateOverall();
+  }
+  render();
+
+  var hideBox=document.getElementById('clHide'); hideBox.checked=hideDone;
+  hideBox.addEventListener('change',function(){hideDone=hideBox.checked; LS.set(K.hide,hideDone); host.classList.toggle('cl-hide',hideDone);});
+  document.getElementById('clReset').addEventListener('click',function(){
+    if(!confirm('¿Desmarcar todos los elementos del checklist?'))return;
+    checked={}; LS.set(K.checked,checked); render();
+  });
+  document.getElementById('clRestore').addEventListener('click',function(){
+    if(!confirm('¿Restaurar los elementos por defecto que has borrado?'))return;
+    deleted={}; LS.set(K.deleted,deleted); render();
+  });
+  document.getElementById('clPrint').addEventListener('click',function(){window.print();});
 })();
 </script>
 </body>
