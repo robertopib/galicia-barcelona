@@ -660,6 +660,9 @@ footer a{color:var(--muted)}
   var API='https://api.jsonbin.io/v3/b/', PFX='gb26:', GUARD='gb26sync:pulled';
   var _rawSet=localStorage.setItem.bind(localStorage);
 
+  // limpiar claves heredadas del checklist estático anterior (gb26:pk-*)
+  (function(){var rm=[],i,k;for(i=0;i<localStorage.length;i++){k=localStorage.key(i);if(k&&k.indexOf('gb26:pk-')===0)rm.push(k);}rm.forEach(function(x){localStorage.removeItem(x);});})();
+
   function snapshot(){var o={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(PFX)===0)o[k]=localStorage.getItem(k);}return o;}
   function applyRemote(obj){
     var del=[],i,k;
@@ -683,7 +686,7 @@ footer a{color:var(--muted)}
   var pushT=null;
   function doPush(){
     setStatus('… guardando');
-    fetch(API+BIN_ID,{method:'PUT',headers:{'Content-Type':'application/json','X-Access-Key':ACCESS_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(snapshot())})
+    fetch(API+BIN_ID,{method:'PUT',keepalive:true,headers:{'Content-Type':'application/json','X-Access-Key':ACCESS_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(snapshot())})
       .then(function(r){setStatus(r.ok?'✓ guardado':'⚠ error al guardar');})
       .catch(function(){setStatus('⚠ sin conexión');});
   }
@@ -708,6 +711,11 @@ footer a{color:var(--muted)}
   }
   window.GBSYNC.pull=pull;
   if(btn)btn.addEventListener('click',pull);
+
+  // vaciar cualquier guardado pendiente al ocultar/cerrar la página (clave en móvil)
+  function flush(){if(pushT){clearTimeout(pushT);pushT=null;doPush();}}
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')flush();});
+  window.addEventListener('pagehide',flush);
 
   if(!sessionStorage.getItem(GUARD)){sessionStorage.setItem(GUARD,'1');pull();}
   else setStatus('✓ al día');
