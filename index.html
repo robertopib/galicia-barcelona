@@ -4,14 +4,15 @@
 <meta charset="utf-8"/>
 <title>Ruta O Grove → Sant Cugat · 1–9 septiembre 2026</title>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<meta name="description" content="Itinerario de road trip en caravana por la costa cantábrica: O Grove, Asturias, Cantabria, País Vasco y Navarra. 1–9 de septiembre de 2026."/>
+<meta name="description" content="Itinerario de road trip en caravana por la costa cantábrica: O Grove, Asturias, Cantabria, País Vasco y Navarra. 1–9 de septiembre de 2026. Mapa, distancias, checklist y seguimiento diario."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
 :root{
   --ocean:#0e5c8a;--ocean-deep:#0a3d5c;--sun:#f5a623;--sunset:#ef6c4d;
-  --coral:#e64a3b;--green:#2f9e63;--amber:#d89400;--ink:#1f2937;--muted:#5b6b7d;
+  --coral:#e64a3b;--green:#2f9e63;--green-deep:#1f7a4a;--amber:#d89400;--ink:#1f2937;--muted:#5b6b7d;
   --bg:#f4f1ea;--card:#ffffff;--line:#e4ddcf;--soft:#faf8f3;
   --shadow:0 6px 24px rgba(14,60,92,.10);--shadow-sm:0 2px 10px rgba(14,60,92,.07);
 }
@@ -25,13 +26,15 @@ main{max-width:1120px;margin:auto;padding:0 20px 60px}
 section{scroll-margin-top:78px}
 
 /* ---- sticky nav ---- */
-.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .nav-inner{max-width:1120px;margin:auto;display:flex;align-items:center;gap:14px;padding:10px 20px;overflow-x:auto}
 .nav-brand{font-family:'Fraunces',serif;font-weight:700;color:var(--ocean-deep);white-space:nowrap;font-size:15px}
 .nav-pills{display:flex;gap:6px;margin-left:auto}
 .nav-pills a{display:inline-flex;flex-direction:column;align-items:center;min-width:38px;padding:4px 8px;border-radius:10px;background:var(--soft);border:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:600;line-height:1.1}
 .nav-pills a b{color:var(--ocean-deep);font-size:14px}
 .nav-pills a:hover{text-decoration:none;background:#fff;border-color:var(--ocean);color:var(--ocean)}
+.nav-pills a.done{background:#e6f5ec;border-color:#bfe6cf}
+.nav-pills a.done b{color:var(--green-deep)}
 
 /* ---- hero ---- */
 .hero{position:relative;color:#fff;padding:56px 20px 62px;text-align:center;overflow:hidden;
@@ -42,7 +45,7 @@ section{scroll-margin-top:78px}
 .hero h1{font-size:clamp(30px,6vw,52px);margin:0 0 8px}
 .hero .route-line{font-size:clamp(15px,2.6vw,20px);font-weight:500;opacity:.95;margin:0 auto 22px;max-width:640px}
 .hero .route-line .dot{opacity:.6;margin:0 8px}
-.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:760px;margin:auto}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:780px;margin:auto}
 .chip{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);
   padding:7px 13px;border-radius:999px;font-size:14px;font-weight:600;backdrop-filter:blur(4px)}
 
@@ -54,25 +57,56 @@ section{scroll-margin-top:78px}
 .warn{border-left:6px solid var(--amber);background:#fffaf0}
 .warn b{color:#a86b00}
 
+/* ---- progress ---- */
+.progress-box{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.progress-track{flex:1;min-width:200px;height:14px;background:var(--soft);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--ocean));transition:width .35s ease}
+.progress-lbl{font-weight:700;color:var(--ocean-deep);white-space:nowrap}
+.progress-reset{font-size:13px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:5px 10px;cursor:pointer}
+.progress-reset:hover{background:var(--soft)}
+
+/* ---- checkbox ---- */
+.chk{position:relative;display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-weight:600}
+.chk input{position:absolute;opacity:0;width:0;height:0}
+.chk .cbx{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid rgba(255,255,255,.75);display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;background:rgba(255,255,255,.14)}
+.chk input:checked + .cbx{background:#fff;color:var(--green-deep);border-color:#fff}
+.chk.dark .cbx{border-color:#c7cfd8;background:#fff;color:var(--green)}
+.chk.dark input:checked + .cbx{background:var(--green);color:#fff;border-color:var(--green)}
+.chk .cbx::after{content:"✓";opacity:0}
+.chk input:checked + .cbx::after{opacity:1}
+
 /* ---- calendar grid ---- */
 .cal{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px}
 .dcard{position:relative;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);
-  border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .15s ease,box-shadow .15s ease}
-.dcard:hover{transform:translateY(-3px);box-shadow:var(--shadow);text-decoration:none}
-.dcard .top{padding:12px 15px;color:#fff;display:flex;align-items:baseline;justify-content:space-between}
+  border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .15s ease,box-shadow .15s ease,opacity .2s}
+.dcard:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.dcard .stretch{position:absolute;inset:0;z-index:1}
+.dcard.done{opacity:.62}
+.dcard .top{position:relative;padding:12px 15px;color:#fff;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .dcard.move .top{background:linear-gradient(135deg,var(--ocean),var(--ocean-deep))}
-.dcard.stay .top{background:linear-gradient(135deg,var(--green),#1f7a4a)}
+.dcard.stay .top{background:linear-gradient(135deg,var(--green),var(--green-deep))}
 .dcard .dow{font-size:12px;text-transform:uppercase;letter-spacing:.08em;opacity:.9;font-weight:600}
 .dcard .dnum{font-family:'Fraunces',serif;font-weight:700;font-size:30px}
 .dcard .dmon{font-size:12px;opacity:.9}
-.dcard .body{padding:13px 15px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.dcard .top .chk{position:relative;z-index:3}
+.dcard .body{position:relative;z-index:0;padding:13px 15px 16px;display:flex;flex-direction:column;gap:7px;flex:1}
 .dcard .badge{align-self:flex-start;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;letter-spacing:.02em}
 .dcard.move .badge{background:#e6f0f7;color:var(--ocean-deep)}
-.dcard.stay .badge{background:#e6f5ec;color:#1f7a4a}
+.dcard.stay .badge{background:#e6f5ec;color:var(--green-deep)}
 .dcard .sleep{font-size:13px;color:var(--muted)}
 .dcard .sleep b{color:var(--ink);font-weight:600}
+.dcard .drive{font-size:12.5px;color:var(--muted);font-weight:600}
 .dcard .plan{font-size:13.5px;color:var(--ink)}
 .dcard .go{margin-top:auto;font-size:12px;font-weight:700;color:var(--ocean)}
+
+/* ---- map ---- */
+#map{height:460px;border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow-sm);z-index:0}
+.mk{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--ocean);
+  border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);display:grid;place-items:center}
+.mk span{transform:rotate(45deg);color:#fff;font-size:11px;font-weight:800;line-height:1}
+.mk.end{background:var(--coral)}.mk.start{background:var(--sun)}
+.leaflet-popup-content{font-family:'Inter',sans-serif;font-size:13.5px}
+.leaflet-popup-content b{font-family:'Fraunces',serif}
 
 /* ---- legend ---- */
 .legend{display:flex;flex-wrap:wrap;gap:16px;font-size:14px;color:var(--muted)}
@@ -83,19 +117,39 @@ section{scroll-margin-top:78px}
 .tramos li{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .tramos .tnum{display:inline-block;background:var(--ocean);color:#fff;font-weight:700;font-size:12px;border-radius:6px;padding:2px 8px;margin-right:8px}
 
+/* ---- bases / reservas ---- */
+.bases{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.basec{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 17px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:9px}
+.basec h3{margin:0;font-size:17px}
+.basec .loc{color:var(--muted);font-size:13px;margin-top:-4px}
+.basec .nights{align-self:flex-start;background:#eef3ff;color:var(--ocean-deep);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+.basec .blinks{display:flex;flex-wrap:wrap;gap:8px;font-size:13px}
+.basec .blinks a{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.basec .basenote{font-size:12.5px;color:var(--muted)}
+.basec .chk{margin-top:auto;font-size:13.5px}
+
+/* ---- checklist ---- */
+.checklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.clcol{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow-sm)}
+.clcol h3{margin:0 0 10px;font-size:16px;display:flex;align-items:center;gap:8px}
+.clcol .chk{display:flex;width:100%;padding:6px 0;font-weight:500;font-size:14px;align-items:flex-start}
+.clcol .chk input:checked ~ .cltext{color:var(--muted);text-decoration:line-through}
+
 /* ---- day sections ---- */
-.day{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:0;margin:22px 0;box-shadow:var(--shadow-sm);overflow:hidden}
+.day{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:0;margin:22px 0;box-shadow:var(--shadow-sm);overflow:hidden;transition:opacity .2s}
+.day.done{opacity:.66}
 .day-head{padding:18px 22px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;color:#fff}
 .day.move .day-head{background:linear-gradient(135deg,var(--ocean),var(--ocean-deep))}
-.day.stay .day-head{background:linear-gradient(135deg,var(--green),#1f7a4a)}
+.day.stay .day-head{background:linear-gradient(135deg,var(--green),var(--green-deep))}
 .day-head .dh-num{font-family:'Fraunces',serif;font-size:34px;font-weight:700;line-height:1}
 .day-head .dh-meta h2{margin:0;font-size:20px;color:#fff}
 .day-head .dh-meta .dh-date{font-size:13px;opacity:.9;text-transform:capitalize}
-.day-head .dh-badge{margin-left:auto;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);
-  padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700}
+.day-head .dh-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.day-head .dh-badge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700}
 .day-body{padding:20px 22px}
-.sleep-row{display:inline-flex;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--line);
-  padding:7px 13px;border-radius:999px;font-size:14px;margin-bottom:14px}
+.day-stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.stat{display:inline-flex;align-items:center;gap:6px;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink)}
+.sleep-row{display:inline-flex;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--line);padding:7px 13px;border-radius:999px;font-size:14px;margin-bottom:14px}
 .logic{background:var(--soft);border-left:4px solid var(--ocean);padding:11px 14px;border-radius:0 10px 10px 0;margin:0 0 16px;font-size:14.5px}
 .corrected{background:#fff8e6;border:1px solid #ffe6a8;border-radius:12px;padding:12px 14px;margin:0 0 16px;font-size:14px}
 .corrected b{color:#a86b00}
@@ -117,7 +171,7 @@ section{scroll-margin-top:78px}
   background:#fff;border:3px solid var(--ocean);box-shadow:0 0 0 3px var(--card)}
 .day.stay .timeline li::before{border-color:var(--green)}
 .timeline .t-time{font-weight:700;font-size:13px;color:var(--ocean-deep);font-variant-numeric:tabular-nums}
-.day.stay .timeline .t-time{color:#1f7a4a}
+.day.stay .timeline .t-time{color:var(--green-deep)}
 .timeline .t-desc{font-size:14.5px}
 
 footer{text-align:center;color:var(--muted);font-size:13px;padding:30px 20px 10px}
@@ -127,7 +181,8 @@ footer a{color:var(--muted)}
   .routes{grid-template-columns:1fr}
   .nav-brand{display:none}
   .nav-pills{margin-left:0}
-  .day-head .dh-badge{margin-left:0;order:3;width:100%}
+  #map{height:360px}
+  .day-head .dh-right{margin-left:0;order:3;width:100%;justify-content:space-between}
 }
 </style>
 </head>
@@ -137,15 +192,15 @@ footer a{color:var(--muted)}
   <div class="nav-inner">
     <span class="nav-brand">🚐 O Grove → Sant Cugat</span>
     <div class="nav-pills">
-      <a href="#d1"><b>1</b>mar</a>
-      <a href="#d2"><b>2</b>mié</a>
-      <a href="#d3"><b>3</b>jue</a>
-      <a href="#d4"><b>4</b>vie</a>
-      <a href="#d5"><b>5</b>sáb</a>
-      <a href="#d6"><b>6</b>dom</a>
-      <a href="#d7"><b>7</b>lun</a>
-      <a href="#d8"><b>8</b>mar</a>
-      <a href="#d9"><b>9</b>mié</a>
+      <a href="#d1" data-nav="d1"><b>1</b>mar</a>
+      <a href="#d2" data-nav="d2"><b>2</b>mié</a>
+      <a href="#d3" data-nav="d3"><b>3</b>jue</a>
+      <a href="#d4" data-nav="d4"><b>4</b>vie</a>
+      <a href="#d5" data-nav="d5"><b>5</b>sáb</a>
+      <a href="#d6" data-nav="d6"><b>6</b>dom</a>
+      <a href="#d7" data-nav="d7"><b>7</b>lun</a>
+      <a href="#d8" data-nav="d8"><b>8</b>mar</a>
+      <a href="#d9" data-nav="d9"><b>9</b>mié</a>
     </div>
   </div>
 </nav>
@@ -158,6 +213,7 @@ footer a{color:var(--muted)}
     <span class="chip">📅 1–9 sep 2026</span>
     <span class="chip">🌙 8 noches · 9 días</span>
     <span class="chip">🏕️ 5 bases</span>
+    <span class="chip">🛣️ ~1.570 km caravana</span>
     <span class="chip">🚐 Across Premium 432CDL</span>
     <span class="chip">🚙 Ford Ranger</span>
     <span class="chip">👥 4 adultos</span>
@@ -171,9 +227,17 @@ footer a{color:var(--muted)}
   <b>⚠️ Confirmar siempre:</b> acceso y pernocta con caravana remolcada, posibilidad de desenganchar, perros, longitud total y maniobra, especialmente en Parking A575, Covadonga y Txingudi.
 </section>
 
+<!-- ============ PROGRESO ============ -->
+<section class="box progress-box">
+  <span style="font-size:22px">✅</span>
+  <div class="progress-track"><div class="progress-fill" id="progbar"></div></div>
+  <span class="progress-lbl" id="proglbl">0 / 9 días completados</span>
+  <button class="progress-reset" id="resetBtn" type="button">Reiniciar</button>
+</section>
+
 <!-- ============ CALENDARIO ============ -->
 <h2 class="section-title"><span class="ic">🗓️</span>Calendario del viaje</h2>
-<p class="section-sub">Nueve días de un vistazo. Toca cualquier día para ver el detalle.</p>
+<p class="section-sub">Nueve días de un vistazo. Marca la casilla de cada día conforme lo completes; se guarda en tu navegador.</p>
 <div class="legend box" style="margin-top:0">
   <span>🚐 <b>Traslado</b> — la caravana se mueve</span>
   <span>🏕️ <b>Base fija</b> — la caravana se queda</span>
@@ -181,46 +245,70 @@ footer a{color:var(--muted)}
 </div>
 
 <section class="cal">
-  <a class="dcard move" href="#d1">
-    <div class="top"><div><div class="dow">martes</div><div class="dnum">1</div><div class="dmon">septiembre</div></div><div style="font-size:26px">🚐</div></div>
-    <div class="body"><span class="badge">Traslado</span><div class="sleep">🌙 <b>Camping Perbes</b></div><div class="plan">O Grove, instalación, Redes y Betanzos.</div><span class="go">Ver día →</span></div>
-  </a>
-  <a class="dcard move" href="#d2">
-    <div class="top"><div><div class="dow">miércoles</div><div class="dnum">2</div><div class="dmon">septiembre</div></div><div style="font-size:26px">🚐</div></div>
-    <div class="body"><span class="badge">Traslado</span><div class="sleep">🌙 <b>Parking Covadonga</b></div><div class="plan">Costa asturiana, Gijón y noche en Covadonga.</div><span class="go">Ver día →</span></div>
-  </a>
-  <a class="dcard stay" href="#d3">
-    <div class="top"><div><div class="dow">jueves</div><div class="dnum">3</div><div class="dmon">septiembre</div></div><div style="font-size:26px">🏕️</div></div>
-    <div class="body"><span class="badge">Base fija</span><div class="sleep">🌙 <b>Parking Covadonga</b></div><div class="plan">Lagos, santuario y Cangas de Onís.</div><span class="go">Ver día →</span></div>
-  </a>
-  <a class="dcard move" href="#d4">
-    <div class="top"><div><div class="dow">viernes</div><div class="dnum">4</div><div class="dmon">septiembre</div></div><div style="font-size:26px">🚐</div></div>
-    <div class="body"><span class="badge">Traslado</span><div class="sleep">🌙 <b>Camping Santillana</b></div><div class="plan">Ruta a Cantabria, Comillas y Santillana del Mar.</div><span class="go">Ver día →</span></div>
-  </a>
-  <a class="dcard stay" href="#d5">
-    <div class="top"><div><div class="dow">sábado</div><div class="dnum">5</div><div class="dmon">septiembre</div></div><div style="font-size:26px">🏕️</div></div>
-    <div class="body"><span class="badge">Base fija</span><div class="sleep">🌙 <b>Camping Santillana</b></div><div class="plan">Potes, Mogrovejo y Fuente Dé.</div><span class="go">Ver día →</span></div>
-  </a>
-  <a class="dcard move" href="#d6">
-    <div class="top"><div><div class="dow">domingo</div><div class="dnum">6</div><div class="dmon">septiembre</div></div><div style="font-size:26px">🚐</div></div>
-    <div class="body"><span class="badge">Traslado</span><div class="sleep">🌙 <b>Autocaravan Park Txingudi</b></div><div class="plan">Santander, Bilbao y llegada a Txingudi.</div><span class="go">Ver día →</span></div>
-  </a>
-  <a class="dcard stay" href="#d7">
-    <div class="top"><div><div class="dow">lunes</div><div class="dnum">7</div><div class="dmon">septiembre</div></div><div style="font-size:26px">🏕️</div></div>
-    <div class="body"><span class="badge">Base fija</span><div class="sleep">🌙 <b>Autocaravan Park Txingudi</b></div><div class="plan">Hondarribia, San Sebastián, Zumaia y San Telmo.</div><span class="go">Ver día →</span></div>
-  </a>
-  <a class="dcard move" href="#d8">
-    <div class="top"><div><div class="dow">martes</div><div class="dnum">8</div><div class="dmon">septiembre</div></div><div style="font-size:26px">🚐</div></div>
-    <div class="body"><span class="badge">Traslado</span><div class="sleep">🌙 <b>Parking caravanas Olite</b></div><div class="plan">Vitoria-Gasteiz, Pamplona y noche en Olite.</div><span class="go">Ver día →</span></div>
-  </a>
-  <a class="dcard move" href="#d9">
-    <div class="top"><div><div class="dow">miércoles</div><div class="dnum">9</div><div class="dmon">septiembre</div></div><div style="font-size:26px">🏁</div></div>
-    <div class="body"><span class="badge">Vuelta a casa</span><div class="sleep">🌙 <b>Sant Cugat del Vallès</b></div><div class="plan">Visita breve a Olite y regreso a casa.</div><span class="go">Ver día →</span></div>
-  </a>
+  <div class="dcard move" data-day="d1">
+    <a class="stretch" href="#d1" aria-label="Ver día 1"></a>
+    <div class="top"><div><div class="dow">martes</div><div class="dnum">1</div><div class="dmon">septiembre</div></div>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d1"><span class="cbx"></span></label></div>
+    <div class="body"><span class="badge">🚐 Traslado</span><div class="sleep">🌙 <b>Camping Perbes</b></div><div class="drive">🚐 166 km · ~2 h</div><div class="plan">O Grove, instalación, Redes y Betanzos.</div><span class="go">Ver día →</span></div>
+  </div>
+  <div class="dcard move" data-day="d2">
+    <a class="stretch" href="#d2" aria-label="Ver día 2"></a>
+    <div class="top"><div><div class="dow">miércoles</div><div class="dnum">2</div><div class="dmon">septiembre</div></div>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d2"><span class="cbx"></span></label></div>
+    <div class="body"><span class="badge">🚐 Traslado</span><div class="sleep">🌙 <b>Parking Covadonga</b></div><div class="drive">🚐 347 km · ~4 h 45</div><div class="plan">Costa asturiana, Gijón y noche en Covadonga.</div><span class="go">Ver día →</span></div>
+  </div>
+  <div class="dcard stay" data-day="d3">
+    <a class="stretch" href="#d3" aria-label="Ver día 3"></a>
+    <div class="top"><div><div class="dow">jueves</div><div class="dnum">3</div><div class="dmon">septiembre</div></div>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d3"><span class="cbx"></span></label></div>
+    <div class="body"><span class="badge">🏕️ Base fija</span><div class="sleep">🌙 <b>Parking Covadonga</b></div><div class="drive">🚙 45 km · ~1 h</div><div class="plan">Lagos, santuario y Cangas de Onís.</div><span class="go">Ver día →</span></div>
+  </div>
+  <div class="dcard move" data-day="d4">
+    <a class="stretch" href="#d4" aria-label="Ver día 4"></a>
+    <div class="top"><div><div class="dow">viernes</div><div class="dnum">4</div><div class="dmon">septiembre</div></div>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d4"><span class="cbx"></span></label></div>
+    <div class="body"><span class="badge">🚐 Traslado</span><div class="sleep">🌙 <b>Camping Santillana</b></div><div class="drive">🚐 114 km · ~1 h 45</div><div class="plan">Ruta a Cantabria, Comillas y Santillana del Mar.</div><span class="go">Ver día →</span></div>
+  </div>
+  <div class="dcard stay" data-day="d5">
+    <a class="stretch" href="#d5" aria-label="Ver día 5"></a>
+    <div class="top"><div><div class="dow">sábado</div><div class="dnum">5</div><div class="dmon">septiembre</div></div>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d5"><span class="cbx"></span></label></div>
+    <div class="body"><span class="badge">🏕️ Base fija</span><div class="sleep">🌙 <b>Camping Santillana</b></div><div class="drive">🚙 216 km · ~3 h 20</div><div class="plan">Potes, Mogrovejo y Fuente Dé.</div><span class="go">Ver día →</span></div>
+  </div>
+  <div class="dcard move" data-day="d6">
+    <a class="stretch" href="#d6" aria-label="Ver día 6"></a>
+    <div class="top"><div><div class="dow">domingo</div><div class="dnum">6</div><div class="dmon">septiembre</div></div>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d6"><span class="cbx"></span></label></div>
+    <div class="body"><span class="badge">🚐 Traslado</span><div class="sleep">🌙 <b>Autocaravan Park Txingudi</b></div><div class="drive">🚐 250 km · ~3 h 25</div><div class="plan">Santander, Bilbao y llegada a Txingudi.</div><span class="go">Ver día →</span></div>
+  </div>
+  <div class="dcard stay" data-day="d7">
+    <a class="stretch" href="#d7" aria-label="Ver día 7"></a>
+    <div class="top"><div><div class="dow">lunes</div><div class="dnum">7</div><div class="dmon">septiembre</div></div>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d7"><span class="cbx"></span></label></div>
+    <div class="body"><span class="badge">🏕️ Base fija</span><div class="sleep">🌙 <b>Autocaravan Park Txingudi</b></div><div class="drive">🚙 115 km · ~1 h 45</div><div class="plan">Hondarribia, San Sebastián, Zumaia y San Telmo.</div><span class="go">Ver día →</span></div>
+  </div>
+  <div class="dcard move" data-day="d8">
+    <a class="stretch" href="#d8" aria-label="Ver día 8"></a>
+    <div class="top"><div><div class="dow">martes</div><div class="dnum">8</div><div class="dmon">septiembre</div></div>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d8"><span class="cbx"></span></label></div>
+    <div class="body"><span class="badge">🚐 Traslado</span><div class="sleep">🌙 <b>Parking caravanas Olite</b></div><div class="drive">🚐 258 km · ~3 h 15</div><div class="plan">Vitoria-Gasteiz, Pamplona y noche en Olite.</div><span class="go">Ver día →</span></div>
+  </div>
+  <div class="dcard move" data-day="d9">
+    <a class="stretch" href="#d9" aria-label="Ver día 9"></a>
+    <div class="top"><div><div class="dow">miércoles</div><div class="dnum">9</div><div class="dmon">septiembre</div></div>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d9"><span class="cbx"></span></label></div>
+    <div class="body"><span class="badge">🏁 Vuelta a casa</span><div class="sleep">🌙 <b>Sant Cugat del Vallès</b></div><div class="drive">🚐 436 km · ~4 h 40</div><div class="plan">Visita breve a Olite y regreso a casa.</div><span class="go">Ver día →</span></div>
+  </div>
 </section>
 
+<!-- ============ MAPA ============ -->
+<h2 class="section-title"><span class="ic">🗺️</span>Mapa de la ruta</h2>
+<p class="section-sub">Bases de pernocta (marcadores) y trazado orientativo del recorrido.</p>
+<div id="map"></div>
+<p class="note">Distancias y tiempos calculados con rutas de coche (OSRM). Con la caravana enganchada, cuenta un <b>15–25&nbsp;% más de tiempo</b> y paradas más frecuentes.</p>
+
 <!-- ============ MAPAS GENERALES ============ -->
-<h2 class="section-title"><span class="ic">🗺️</span>Mapas generales por tramos</h2>
+<h2 class="section-title"><span class="ic">🧭</span>Mapas generales por tramos</h2>
 <div class="box" style="margin-top:6px">
 <ul class="tramos">
 <li><span class="tnum">Tramo 1</span><a href="https://www.google.com/maps/dir/?api=1&amp;origin=O+Grove,+Pontevedra,+Espa%C3%B1a&amp;destination=Parking+Covadonga,+Cangas+de+On%C3%ADs,+Asturias,+Espa%C3%B1a&amp;travelmode=driving&amp;waypoints=Camping+Perbes,+Mi%C3%B1o,+A+Coru%C3%B1a,+Espa%C3%B1a|Playa+del+Silencio,+Asturias,+Espa%C3%B1a|Cudillero,+Asturias,+Espa%C3%B1a|Gij%C3%B3n,+Asturias,+Espa%C3%B1a" target="_blank" rel="noopener">O Grove → Perbes → Gijón → Covadonga</a></li>
@@ -229,16 +317,116 @@ footer a{color:var(--muted)}
 </ul>
 </div>
 
+<!-- ============ BASES / RESERVAS ============ -->
+<h2 class="section-title"><span class="ic">🏕️</span>Bases y reservas</h2>
+<p class="section-sub">Confirma disponibilidad, admisión de perros y acceso con caravana. Marca cada reserva cuando esté cerrada.</p>
+<section class="bases">
+  <div class="basec">
+    <span class="nights">Noche 1</span>
+    <h3>Camping Perbes</h3><div class="loc">Miño, A Coruña (Galicia)</div>
+    <div class="blinks"><a href="https://www.google.com/maps/search/?api=1&amp;query=Camping+Perbes+Mi%C3%B1o+A+Coru%C3%B1a" target="_blank" rel="noopener">📍 Maps</a><a href="https://www.google.com/search?q=Camping+Perbes+Mi%C3%B1o+reservas+tel%C3%A9fono" target="_blank" rel="noopener">🔎 Reservas / teléfono</a></div>
+    <div class="basenote">Confirmar: caravana + 2 perros.</div>
+    <label class="chk dark"><input type="checkbox" data-check="res-perbes"><span class="cbx"></span><span class="cltext">Reserva confirmada</span></label>
+  </div>
+  <div class="basec">
+    <span class="nights">Noches 2–3</span>
+    <h3>Parking Covadonga</h3><div class="loc">Cangas de Onís, Asturias</div>
+    <div class="blinks"><a href="https://www.google.com/maps/search/?api=1&amp;query=Parking+Covadonga+Cangas+de+On%C3%ADs" target="_blank" rel="noopener">📍 Maps</a><a href="https://www.google.com/search?q=aparcamiento+Covadonga+autocaravanas+pernocta+normativa" target="_blank" rel="noopener">🔎 Normativa / horarios</a></div>
+    <div class="basenote">Verificar pernocta con caravana y acceso a los Lagos.</div>
+    <label class="chk dark"><input type="checkbox" data-check="res-covadonga"><span class="cbx"></span><span class="cltext">Comprobado</span></label>
+  </div>
+  <div class="basec">
+    <span class="nights">Noches 4–5</span>
+    <h3>Camping Santillana</h3><div class="loc">Santillana del Mar, Cantabria</div>
+    <div class="blinks"><a href="https://www.google.com/maps/search/?api=1&amp;query=Camping+Santillana+del+Mar" target="_blank" rel="noopener">📍 Maps</a><a href="https://www.google.com/search?q=Camping+Santillana+del+Mar+reservas+tel%C3%A9fono" target="_blank" rel="noopener">🔎 Reservas / teléfono</a></div>
+    <div class="basenote">Confirmar: caravana + 2 perros.</div>
+    <label class="chk dark"><input type="checkbox" data-check="res-santillana"><span class="cbx"></span><span class="cltext">Reserva confirmada</span></label>
+  </div>
+  <div class="basec">
+    <span class="nights">Noches 6–7</span>
+    <h3>Autocaravan Park Txingudi</h3><div class="loc">Irun, Gipuzkoa (País Vasco)</div>
+    <div class="blinks"><a href="https://www.google.com/maps/search/?api=1&amp;query=Autocaravan+Park+Txingudi+Irun" target="_blank" rel="noopener">📍 Maps</a><a href="https://www.google.com/search?q=Autocaravan+Park+Txingudi+Irun+reservas+tel%C3%A9fono" target="_blank" rel="noopener">🔎 Reservas / teléfono</a></div>
+    <div class="basenote">Confirmar longitud del conjunto y perros.</div>
+    <label class="chk dark"><input type="checkbox" data-check="res-txingudi"><span class="cbx"></span><span class="cltext">Reserva confirmada</span></label>
+  </div>
+  <div class="basec">
+    <span class="nights">Noche 8</span>
+    <h3>Parking caravanas Olite</h3><div class="loc">Olite, Navarra</div>
+    <div class="blinks"><a href="https://www.google.com/maps/search/?api=1&amp;query=Parking+autocaravanas+Olite+Navarra" target="_blank" rel="noopener">📍 Maps</a><a href="https://www.google.com/search?q=parking+autocaravanas+Olite+Navarra+pernocta" target="_blank" rel="noopener">🔎 Normativa / horarios</a></div>
+    <div class="basenote">Prever aparcamiento exterior y accesible.</div>
+    <label class="chk dark"><input type="checkbox" data-check="res-olite"><span class="cbx"></span><span class="cltext">Comprobado</span></label>
+  </div>
+</section>
+
+<!-- ============ CHECKLIST ============ -->
+<h2 class="section-title"><span class="ic">🧳</span>Checklist de equipaje</h2>
+<p class="section-sub">Se guarda automáticamente en tu navegador. Úsalo para no olvidar nada antes de salir.</p>
+<section class="checklist">
+  <div class="clcol">
+    <h3>📄 Documentación</h3>
+    <label class="chk dark"><input type="checkbox" data-check="pk-doc1"><span class="cbx"></span><span class="cltext">DNI / pasaportes</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-doc2"><span class="cbx"></span><span class="cltext">Permiso de conducir</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-doc3"><span class="cbx"></span><span class="cltext">Permiso circulación + ficha técnica (coche y caravana)</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-doc4"><span class="cbx"></span><span class="cltext">Seguros al día (coche + caravana)</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-doc5"><span class="cbx"></span><span class="cltext">Tarjeta sanitaria</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-doc6"><span class="cbx"></span><span class="cltext">Reservas y contactos anotados</span></label>
+  </div>
+  <div class="clcol">
+    <h3>🚐 Coche y caravana</h3>
+    <label class="chk dark"><input type="checkbox" data-check="pk-car1"><span class="cbx"></span><span class="cltext">Presión neumáticos y frenos revisados</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-car2"><span class="cbx"></span><span class="cltext">Rueda de repuesto + gato</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-car3"><span class="cbx"></span><span class="cltext">Triángulos / balizas + chalecos</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-car4"><span class="cbx"></span><span class="cltext">Cuñas de nivelación y calzos</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-car5"><span class="cbx"></span><span class="cltext">Espejos de remolque</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-car6"><span class="cbx"></span><span class="cltext">Mangueras de agua + cable eléctrico y adaptadores</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-car7"><span class="cbx"></span><span class="cltext">Producto WC químico + kit herramientas</span></label>
+  </div>
+  <div class="clcol">
+    <h3>🐕 Perros</h3>
+    <label class="chk dark"><input type="checkbox" data-check="pk-dog1"><span class="cbx"></span><span class="cltext">Cartilla veterinaria + microchip</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-dog2"><span class="cbx"></span><span class="cltext">Antiparasitarios al día</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-dog3"><span class="cbx"></span><span class="cltext">Comida + comederos + agua de viaje</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-dog4"><span class="cbx"></span><span class="cltext">Correas, arneses y bozales</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-dog5"><span class="cbx"></span><span class="cltext">Camas / mantas y toalla</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-dog6"><span class="cbx"></span><span class="cltext">Bolsas para excrementos</span></label>
+  </div>
+  <div class="clcol">
+    <h3>🍳 Cocina y camping</h3>
+    <label class="chk dark"><input type="checkbox" data-check="pk-cmp1"><span class="cbx"></span><span class="cltext">Bombona de gas + menaje</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-cmp2"><span class="cbx"></span><span class="cltext">Nevera / hielo</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-cmp3"><span class="cbx"></span><span class="cltext">Agua potable de reserva</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-cmp4"><span class="cbx"></span><span class="cltext">Sillas, mesa y toldo</span></label>
+  </div>
+  <div class="clcol">
+    <h3>🧥 Ropa y personal</h3>
+    <label class="chk dark"><input type="checkbox" data-check="pk-per1"><span class="cbx"></span><span class="cltext">Chubasquero / cortavientos (norte lluvioso)</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-per2"><span class="cbx"></span><span class="cltext">Calzado cómodo / de senderismo</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-per3"><span class="cbx"></span><span class="cltext">Bañadores y toallas</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-per4"><span class="cbx"></span><span class="cltext">Botiquín + medicación</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-per5"><span class="cbx"></span><span class="cltext">Protección solar y gorra</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-per6"><span class="cbx"></span><span class="cltext">Cargadores + power bank</span></label>
+  </div>
+  <div class="clcol">
+    <h3>🥾 Excursiones</h3>
+    <label class="chk dark"><input type="checkbox" data-check="pk-exc1"><span class="cbx"></span><span class="cltext">Mochila de día</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-exc2"><span class="cbx"></span><span class="cltext">Bastones de senderismo</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-exc3"><span class="cbx"></span><span class="cltext">Prismáticos</span></label>
+    <label class="chk dark"><input type="checkbox" data-check="pk-exc4"><span class="cbx"></span><span class="cltext">Cámara / móvil con espacio libre</span></label>
+  </div>
+</section>
+
 <!-- ============ DETALLE DÍA A DÍA ============ -->
 <h2 class="section-title"><span class="ic">📍</span>Detalle día a día</h2>
 
-<section class="day move" id="d1">
+<section class="day move" data-day="d1" id="d1">
   <div class="day-head">
     <div class="dh-num">01</div>
     <div class="dh-meta"><h2>O Grove → Perbes</h2><div class="dh-date">martes, 1 de septiembre</div></div>
-    <div class="dh-badge">🚐 Traslado</div>
+    <div class="dh-right"><span class="dh-badge">🚐 Traslado</span>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d1"><span class="cbx"></span> Hecho</label></div>
   </div>
   <div class="day-body">
+    <div class="day-stats"><span class="stat">🚐 Traslado 166 km · ~2 h</span><span class="stat">🚙 Excursión 71 km · ~1 h 10</span></div>
     <div class="sleep-row">🌙 <b>Dormir:</b>&nbsp;Camping Perbes</div>
     <p class="logic"><b>Lógica:</b> Primera etapa corta para instalar la caravana y dedicar la tarde a Redes y Betanzos.</p>
     <div class="routes">
@@ -253,13 +441,15 @@ footer a{color:var(--muted)}
   </div>
 </section>
 
-<section class="day move" id="d2">
+<section class="day move" data-day="d2" id="d2">
   <div class="day-head">
     <div class="dh-num">02</div>
     <div class="dh-meta"><h2>Costa asturiana → Covadonga</h2><div class="dh-date">miércoles, 2 de septiembre</div></div>
-    <div class="dh-badge">🚐 Traslado</div>
+    <div class="dh-right"><span class="dh-badge">🚐 Traslado</span>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d2"><span class="cbx"></span> Hecho</label></div>
   </div>
   <div class="day-body">
+    <div class="day-stats"><span class="stat">🚐 Traslado 347 km · ~4 h 45</span></div>
     <div class="sleep-row">🌙 <b>Dormir:</b>&nbsp;Parking Covadonga</div>
     <p class="corrected"><b>Corrección confirmada:</b> Gijón es una parada, no la base nocturna. Después del paseo se continúa hacia Covadonga para amanecer allí.</p>
     <p class="logic"><b>Lógica:</b> Avanzar por la costa asturiana durante el día, hacer una visita breve a Gijón y completar por la noche el traslado hasta Covadonga.</p>
@@ -277,13 +467,15 @@ footer a{color:var(--muted)}
   </div>
 </section>
 
-<section class="day stay" id="d3">
+<section class="day stay" data-day="d3" id="d3">
   <div class="day-head">
     <div class="dh-num">03</div>
     <div class="dh-meta"><h2>Lagos de Covadonga</h2><div class="dh-date">jueves, 3 de septiembre</div></div>
-    <div class="dh-badge">🏕️ Base fija</div>
+    <div class="dh-right"><span class="dh-badge">🏕️ Base fija</span>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d3"><span class="cbx"></span> Hecho</label></div>
   </div>
   <div class="day-body">
+    <div class="day-stats"><span class="stat">🚙 Excursión 45 km · ~1 h</span></div>
     <div class="sleep-row">🌙 <b>Dormir:</b>&nbsp;Parking Covadonga</div>
     <p class="logic"><b>Lógica:</b> Amanecer ya en Covadonga permite dedicar el día completo a los lagos, el santuario y Cangas de Onís.</p>
     <div class="routes">
@@ -298,13 +490,15 @@ footer a{color:var(--muted)}
   </div>
 </section>
 
-<section class="day move" id="d4">
+<section class="day move" data-day="d4" id="d4">
   <div class="day-head">
     <div class="dh-num">04</div>
     <div class="dh-meta"><h2>Covadonga → Santillana</h2><div class="dh-date">viernes, 4 de septiembre</div></div>
-    <div class="dh-badge">🚐 Traslado</div>
+    <div class="dh-right"><span class="dh-badge">🚐 Traslado</span>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d4"><span class="cbx"></span> Hecho</label></div>
   </div>
   <div class="day-body">
+    <div class="day-stats"><span class="stat">🚐 Traslado 114 km · ~1 h 45</span><span class="stat">🚙 Excursión Comillas (corta)</span></div>
     <div class="sleep-row">🌙 <b>Dormir:</b>&nbsp;Camping Santillana</div>
     <p class="logic"><b>Lógica:</b> Cambio de base a Cantabria y tarde centrada en Comillas y Santillana del Mar.</p>
     <div class="routes">
@@ -320,13 +514,15 @@ footer a{color:var(--muted)}
   </div>
 </section>
 
-<section class="day stay" id="d5">
+<section class="day stay" data-day="d5" id="d5">
   <div class="day-head">
     <div class="dh-num">05</div>
     <div class="dh-meta"><h2>Picos de Europa · Fuente Dé</h2><div class="dh-date">sábado, 5 de septiembre</div></div>
-    <div class="dh-badge">🏕️ Base fija</div>
+    <div class="dh-right"><span class="dh-badge">🏕️ Base fija</span>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d5"><span class="cbx"></span> Hecho</label></div>
   </div>
   <div class="day-body">
+    <div class="day-stats"><span class="stat">🚙 Excursión 216 km · ~3 h 20</span></div>
     <div class="sleep-row">🌙 <b>Dormir:</b>&nbsp;Camping Santillana</div>
     <p class="logic"><b>Lógica:</b> Excursión de día completo a Liébana y Fuente Dé, dejando la caravana en Santillana.</p>
     <div class="routes">
@@ -341,13 +537,15 @@ footer a{color:var(--muted)}
   </div>
 </section>
 
-<section class="day move" id="d6">
+<section class="day move" data-day="d6" id="d6">
   <div class="day-head">
     <div class="dh-num">06</div>
     <div class="dh-meta"><h2>Santander · Bilbao → Txingudi</h2><div class="dh-date">domingo, 6 de septiembre</div></div>
-    <div class="dh-badge">🚐 Traslado</div>
+    <div class="dh-right"><span class="dh-badge">🚐 Traslado</span>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d6"><span class="cbx"></span> Hecho</label></div>
   </div>
   <div class="day-body">
+    <div class="day-stats"><span class="stat">🚐 Traslado 250 km · ~3 h 25</span></div>
     <div class="sleep-row">🌙 <b>Dormir:</b>&nbsp;Autocaravan Park Txingudi</div>
     <p class="logic"><b>Lógica:</b> Jornada de traslado con visitas urbanas a Santander y Bilbao antes de llegar a la nueva base.</p>
     <div class="routes">
@@ -364,13 +562,15 @@ footer a{color:var(--muted)}
   </div>
 </section>
 
-<section class="day stay" id="d7">
+<section class="day stay" data-day="d7" id="d7">
   <div class="day-head">
     <div class="dh-num">07</div>
     <div class="dh-meta"><h2>Costa guipuzcoana</h2><div class="dh-date">lunes, 7 de septiembre</div></div>
-    <div class="dh-badge">🏕️ Base fija</div>
+    <div class="dh-right"><span class="dh-badge">🏕️ Base fija</span>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d7"><span class="cbx"></span> Hecho</label></div>
   </div>
   <div class="day-body">
+    <div class="day-stats"><span class="stat">🚙 Excursión 115 km · ~1 h 45</span></div>
     <div class="sleep-row">🌙 <b>Dormir:</b>&nbsp;Autocaravan Park Txingudi</div>
     <p class="logic"><b>Lógica:</b> Día completo sin mover la caravana por la costa guipuzcoana.</p>
     <div class="routes">
@@ -385,13 +585,15 @@ footer a{color:var(--muted)}
   </div>
 </section>
 
-<section class="day move" id="d8">
+<section class="day move" data-day="d8" id="d8">
   <div class="day-head">
     <div class="dh-num">08</div>
     <div class="dh-meta"><h2>Vitoria · Pamplona → Olite</h2><div class="dh-date">martes, 8 de septiembre</div></div>
-    <div class="dh-badge">🚐 Traslado</div>
+    <div class="dh-right"><span class="dh-badge">🚐 Traslado</span>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d8"><span class="cbx"></span> Hecho</label></div>
   </div>
   <div class="day-body">
+    <div class="day-stats"><span class="stat">🚐 Traslado 258 km · ~3 h 15</span></div>
     <div class="sleep-row">🌙 <b>Dormir:</b>&nbsp;Parking caravanas Olite</div>
     <p class="logic"><b>Lógica:</b> Visitar Vitoria y Pamplona durante el día y desplazarse a Olite al final de la jornada.</p>
     <div class="routes">
@@ -409,13 +611,15 @@ footer a{color:var(--muted)}
   </div>
 </section>
 
-<section class="day move" id="d9">
+<section class="day move" data-day="d9" id="d9">
   <div class="day-head">
     <div class="dh-num">09</div>
     <div class="dh-meta"><h2>Olite → Sant Cugat 🏁</h2><div class="dh-date">miércoles, 9 de septiembre</div></div>
-    <div class="dh-badge">🏁 Vuelta a casa</div>
+    <div class="dh-right"><span class="dh-badge">🏁 Vuelta a casa</span>
+      <label class="chk" title="Marcar día como hecho"><input type="checkbox" data-check="d9"><span class="cbx"></span> Hecho</label></div>
   </div>
   <div class="day-body">
+    <div class="day-stats"><span class="stat">🚐 Traslado 436 km · ~4 h 40</span></div>
     <div class="sleep-row">🏡 <b>Fin del viaje:</b>&nbsp;Sant Cugat del Vallès</div>
     <p class="logic"><b>Lógica:</b> Visita breve a Olite por la mañana y regreso directo a casa.</p>
     <div class="routes">
@@ -430,9 +634,96 @@ footer a{color:var(--muted)}
 </section>
 
 <footer>
-  Itinerario v1.1 · O Grove → Sant Cugat · 1–9 de septiembre de 2026 · Ford Ranger + Across Premium 432CDL
+  Itinerario v2 · O Grove → Sant Cugat · 1–9 de septiembre de 2026 · Ford Ranger + Across Premium 432CDL<br>
+  Tu progreso y checklist se guardan solo en este navegador/dispositivo.
 </footer>
 
 </main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function(){
+  // ---------- persistent checkboxes ----------
+  var PFX='gb26:';
+  function get(k){try{return localStorage.getItem(PFX+k)==='1';}catch(e){return false;}}
+  function set(k,v){try{localStorage.setItem(PFX+k,v?'1':'0');}catch(e){}}
+  var dayKeys=['d1','d2','d3','d4','d5','d6','d7','d8','d9'];
+
+  function applyDayState(key,checked){
+    document.querySelectorAll('[data-day="'+key+'"]').forEach(function(el){el.classList.toggle('done',checked);});
+    var nav=document.querySelector('[data-nav="'+key+'"]'); if(nav) nav.classList.toggle('done',checked);
+  }
+  function updateProgress(){
+    var done=dayKeys.filter(function(k){return get(k);}).length;
+    var pct=Math.round(done/dayKeys.length*100);
+    var bar=document.getElementById('progbar'); if(bar) bar.style.width=pct+'%';
+    var lbl=document.getElementById('proglbl'); if(lbl) lbl.textContent=done+' / '+dayKeys.length+' días completados';
+  }
+
+  var boxes=[].slice.call(document.querySelectorAll('input[type=checkbox][data-check]'));
+  boxes.forEach(function(b){
+    var key=b.dataset.check;
+    b.checked=get(key);
+    if(dayKeys.indexOf(key)>-1) applyDayState(key,b.checked);
+    b.addEventListener('click',function(e){e.stopPropagation();});
+    b.addEventListener('change',function(){
+      set(key,b.checked);
+      boxes.forEach(function(o){if(o!==b&&o.dataset.check===key) o.checked=b.checked;});
+      if(dayKeys.indexOf(key)>-1){applyDayState(key,b.checked);updateProgress();}
+    });
+  });
+  updateProgress();
+
+  var reset=document.getElementById('resetBtn');
+  if(reset) reset.addEventListener('click',function(){
+    if(!confirm('¿Desmarcar todos los días completados?')) return;
+    dayKeys.forEach(function(k){set(k,false);});
+    boxes.forEach(function(b){if(dayKeys.indexOf(b.dataset.check)>-1){b.checked=false;applyDayState(b.dataset.check,false);}});
+    updateProgress();
+  });
+
+  // ---------- map ----------
+  if(window.L){
+    var bases=[
+      {t:'O Grove',      ll:[42.4939,-8.8635], d:'Salida · 1 sep',   cls:'start'},
+      {t:'Camping Perbes',ll:[43.4189,-8.1997],d:'Noche 1'},
+      {t:'Parking Covadonga',ll:[43.3086,-5.0556],d:'Noches 2–3'},
+      {t:'Camping Santillana',ll:[43.3936,-4.1082],d:'Noches 4–5'},
+      {t:'Autocaravan Park Txingudi',ll:[43.3416,-1.7936],d:'Noches 6–7'},
+      {t:'Parking Olite',ll:[42.4817,-1.6512], d:'Noche 8'},
+      {t:'Sant Cugat del Vallès',ll:[41.4727,2.0819],d:'Llegada · 9 sep',cls:'end'}
+    ];
+    var stops=[
+      ['Cudillero',43.5622,-6.1447],['Gijón',43.5322,-5.6615],['Comillas',43.3874,-4.2909],
+      ['Potes',43.1550,-4.6199],['Fuente Dé',43.1470,-4.8100],['Santander',43.4623,-3.8044],
+      ['Bilbao',43.2630,-2.9350],['San Sebastián',43.3183,-1.9812],['Vitoria-Gasteiz',42.8467,-2.6720],
+      ['Pamplona',42.8125,-1.6432]
+    ];
+    var line=[
+      [42.4939,-8.8635],[43.4189,-8.1997],[43.5622,-6.1447],[43.5322,-5.6615],[43.3086,-5.0556],
+      [43.3936,-4.1082],[43.4623,-3.8044],[43.2630,-2.9350],[43.3416,-1.7936],
+      [42.8467,-2.6720],[42.8125,-1.6432],[42.4817,-1.6512],[41.4727,2.0819]
+    ];
+    var map=L.map('map',{scrollWheelZoom:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      maxZoom:18, attribution:'&copy; OpenStreetMap'
+    }).addTo(map);
+    L.polyline(line,{color:'#0e5c8a',weight:4,opacity:.7,dashArray:'2,8'}).addTo(map);
+    stops.forEach(function(s){
+      L.circleMarker([s[1],s[2]],{radius:4,color:'#ef6c4d',fillColor:'#ef6c4d',fillOpacity:.9,weight:1})
+        .addTo(map).bindPopup('<b>'+s[0]+'</b><br>Parada');
+    });
+    var group=[];
+    bases.forEach(function(b,i){
+      var label=(i===0?'A':(i===bases.length-1?'B':i));
+      var icon=L.divIcon({className:'',iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28],
+        html:'<div class="mk '+(b.cls||'')+'"><span>'+label+'</span></div>'});
+      L.marker(b.ll,{icon:icon}).addTo(map).bindPopup('<b>'+b.t+'</b><br>'+b.d);
+      group.push(b.ll);
+    });
+    map.fitBounds(group,{padding:[40,40]});
+  }
+})();
+</script>
 </body>
 </html>
