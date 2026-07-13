@@ -276,6 +276,8 @@ footer a{color:var(--muted)}
   <div class="progress-track"><div class="progress-fill" id="progbar"></div></div>
   <span class="progress-lbl" id="proglbl">0 / 9 días listos</span>
   <button class="progress-reset" id="resetBtn" type="button">Reiniciar</button>
+  <button class="progress-reset" id="syncBtn" type="button">🔄 Sincronizar</button>
+  <span class="progress-lbl" id="syncStatus" style="font-weight:600;color:var(--muted);font-size:13px"></span>
 </section>
 
 <!-- ============ CALENDARIO ============ -->
@@ -645,6 +647,72 @@ footer a{color:var(--muted)}
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
+// ========================= GUARDADO COMPARTIDO (JSONBin) =========================
+(function(){
+  /* ===== CONFIG: rellená estos dos valores para activar el guardado compartido =====
+     BIN_ID     -> el ID del bin que creés en jsonbin.io
+     ACCESS_KEY -> una Access Key con permisos SOLO de Read + Update
+     Mientras estén vacíos, el sitio guarda solo en este navegador (como hasta ahora). */
+  var BIN_ID='';
+  var ACCESS_KEY='';
+  /* ================================================================================ */
+
+  var API='https://api.jsonbin.io/v3/b/', PFX='gb26:', GUARD='gb26sync:pulled';
+  var _rawSet=localStorage.setItem.bind(localStorage);
+
+  function snapshot(){var o={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(PFX)===0)o[k]=localStorage.getItem(k);}return o;}
+  function applyRemote(obj){
+    var del=[],i,k;
+    for(i=0;i<localStorage.length;i++){k=localStorage.key(i);if(k&&k.indexOf(PFX)===0&&!(k in obj))del.push(k);}
+    del.forEach(function(x){localStorage.removeItem(x);});
+    Object.keys(obj).forEach(function(x){_rawSet(x,obj[x]);});
+  }
+  function differs(remote){var l=snapshot(),lk=Object.keys(l),rk=Object.keys(remote);if(lk.length!==rk.length)return true;for(var i=0;i<rk.length;i++)if(l[rk[i]]!==remote[rk[i]])return true;return false;}
+  function setStatus(t){var el=document.getElementById('syncStatus');if(el)el.textContent=t;}
+
+  window.GBSYNC={enabled:false,push:function(){},pull:function(){}};
+  var btn=document.getElementById('syncBtn');
+
+  if(!(BIN_ID&&ACCESS_KEY)){
+    if(btn)btn.style.display='none';
+    setStatus('Guardado local (este navegador)');
+    return;
+  }
+  window.GBSYNC.enabled=true;
+
+  var pushT=null;
+  function doPush(){
+    setStatus('… guardando');
+    fetch(API+BIN_ID,{method:'PUT',headers:{'Content-Type':'application/json','X-Access-Key':ACCESS_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(snapshot())})
+      .then(function(r){setStatus(r.ok?'✓ guardado':'⚠ error al guardar');})
+      .catch(function(){setStatus('⚠ sin conexión');});
+  }
+  function schedulePush(){if(pushT)clearTimeout(pushT);setStatus('… guardando');pushT=setTimeout(doPush,1200);}
+  localStorage.setItem=function(k,v){_rawSet(k,v);if(String(k).indexOf(PFX)===0)schedulePush();};
+  window.GBSYNC.push=doPush;
+
+  function pull(){
+    setStatus('… sincronizando');
+    return fetch(API+BIN_ID+'/latest',{headers:{'X-Access-Key':ACCESS_KEY,'X-Bin-Meta':'false'}})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(data){
+        if(data&&typeof data==='object'){
+          var rk=Object.keys(data), local=snapshot();
+          if(rk.length===0&&Object.keys(local).length>0){doPush();return;}
+          if(differs(data)){applyRemote(data);location.reload();return;}
+        }
+        setStatus('✓ al día');
+      })
+      .catch(function(){setStatus('⚠ sin conexión');});
+  }
+  window.GBSYNC.pull=pull;
+  if(btn)btn.addEventListener('click',pull);
+
+  if(!sessionStorage.getItem(GUARD)){sessionStorage.setItem(GUARD,'1');pull();}
+  else setStatus('✓ al día');
+})();
+// ================================================================================
+
 (function(){
   // ---------- persistent checkboxes ----------
   var PFX='gb26:';
