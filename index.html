@@ -650,7 +650,7 @@ footer a{color:var(--muted)}
 
 <footer>
   Itinerario v2 · O Grove → Sant Cugat · 1–9 de septiembre de 2026 · Ford Ranger + Across Premium 432CDL<br>
-  Guardado compartido entre dispositivos · <b>build 5</b>
+  Guardado compartido entre dispositivos · <b>build 6</b>
 </footer>
 
 </main>
@@ -720,28 +720,37 @@ footer a{color:var(--muted)}
       .then(function(raw){var data={},meta={};if(raw&&typeof raw==='object'){meta=pj(raw[TS])||{};Object.keys(raw).forEach(function(k){if(k.indexOf(PFX)===0&&k!==TS)data[k]=raw[k];});}return {data:data,meta:meta};});
   }
 
+  window.GB_REFRESH=window.GB_REFRESH||[];
+  function refreshAll(){window.GB_REFRESH.forEach(function(f){try{f();}catch(e){}});}
+
   var pushT=null;
   function syncNow(reason){
-    setStatus(reason==='push'?'… guardando':'… sincronizando');
+    if(reason!=='poll')setStatus(reason==='push'?'… guardando':'… sincronizando');
     return fetchRemote().then(function(rem){
       var lD=snapshot(), r=merge(rem.data,rem.meta,lD,META);
-      if(differsObj(r.data,rem.data)||differsObj(r.meta,rem.meta))rawPut(r.data,r.meta);
       var changed=differsObj(r.data,lD);
       applyMerged(r.data,r.meta);
-      if(changed){location.reload();return;}
-      setStatus(reason==='push'?'✓ guardado':'✓ al día');
-    }).catch(function(){setStatus('⚠ sin conexión');});
+      if(changed)refreshAll();                      // aplicar cambios remotos en caliente (sin recargar)
+      if(differsObj(r.data,rem.data)||differsObj(r.meta,rem.meta)){
+        return rawPut(r.data,r.meta).then(function(res){setStatus(res&&res.ok?'✓ guardado':'⚠ error al guardar');});
+      }
+      setStatus(changed?'✓ actualizado':'✓ al día');
+    }).catch(function(){
+      // si falla la lectura, subir al menos lo local para no perder el cambio
+      return rawPut(snapshot(),META).then(function(res){setStatus(res&&res.ok?'✓ guardado':'⚠ sin conexión');}).catch(function(){setStatus('⚠ sin conexión');});
+    });
   }
-  function schedulePush(){if(pushT)clearTimeout(pushT);setStatus('… guardando');pushT=setTimeout(function(){pushT=null;syncNow('push');},1000);}
+  function schedulePush(){if(pushT)clearTimeout(pushT);setStatus('… guardando');pushT=setTimeout(function(){pushT=null;syncNow('push');},600);}
   localStorage.setItem=function(k,v){_rawSet(k,v);if(String(k).indexOf(PFX)===0&&k!==TS){META[k]=Date.now();saveMeta();schedulePush();}};
   window.GBSYNC.push=function(){if(pushT){clearTimeout(pushT);pushT=null;}return syncNow('push');};
   window.GBSYNC.pull=function(){return syncNow('pull');};
   if(btn)btn.addEventListener('click',function(){syncNow('pull');});
 
-  // al ocultar/cerrar: guardar pendiente; al volver a la pestaña: traer cambios
   function flush(){if(pushT){clearTimeout(pushT);pushT=null;syncNow('push');}}
-  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')flush();else if(!pushT)syncNow('pull');});
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')flush();else syncNow('pull');});
   window.addEventListener('pagehide',flush);
+  // sondeo suave: traer cambios de otros mientras la pestaña está visible
+  setInterval(function(){if(document.visibilityState==='visible'&&!pushT)syncNow('poll');},30000);
 
   syncNow('pull');
 })();
@@ -778,6 +787,13 @@ footer a{color:var(--muted)}
     });
   });
   updateProgress();
+
+  function refreshDays(){
+    boxes.forEach(function(b){b.checked=get(b.dataset.check);});
+    dayKeys.forEach(function(k){applyDayState(k,get(k));});
+    updateProgress();
+  }
+  (window.GB_REFRESH=window.GB_REFRESH||[]).push(refreshDays);
 
   var reset=document.getElementById('resetBtn');
   if(reset) reset.addEventListener('click',function(){
@@ -1009,6 +1025,7 @@ footer a{color:var(--muted)}
     updateOverall();
   }
   render();
+  (window.GB_REFRESH=window.GB_REFRESH||[]).push(function(){loadState();render();});
 
   var hideBox=document.getElementById('clHide'); hideBox.checked=hideDone;
   hideBox.addEventListener('change',function(){hideDone=hideBox.checked; LS.set(K.hide,hideDone); host.classList.toggle('cl-hide',hideDone);});
