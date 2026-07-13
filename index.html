@@ -150,14 +150,23 @@ section{scroll-margin-top:78px}
 .clitem{display:flex;align-items:center;gap:8px;padding:5px 0}
 .clitem .clchk{flex:1;width:auto;padding:0;font-weight:500;font-size:14px;align-items:center}
 .clitem.done .cltext{color:var(--muted);text-decoration:line-through}
-.cldel{flex:none;width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;opacity:.45;transition:.15s}
-.cldel:hover{opacity:1;border-color:var(--coral);color:var(--coral)}
-.claddrow{display:flex;gap:8px;margin-top:12px}
+.clitem .cledit{display:none;flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font:inherit;font-size:14px}
+.clitem .cledit:focus{outline:none;border-color:var(--ocean)}
+.cldel{display:none;flex:none;width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;align-items:center;justify-content:center;transition:.15s}
+.cldel:hover{border-color:var(--coral);color:var(--coral)}
+.claddrow{display:none;gap:8px;margin-top:12px}
 .claddrow input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;font-size:13px}
 .claddrow input:focus{outline:none;border-color:var(--ocean)}
 .cladd{flex:none;border:1px solid var(--ocean);background:var(--ocean);color:#fff;border-radius:8px;padding:7px 13px;font-weight:600;cursor:pointer;font-size:13px}
 .cladd:hover{background:var(--ocean-deep)}
 .cl-hide .clitem.done{display:none}
+/* modo edición: borrar/renombrar/agregar solo al pulsar «Editar» */
+.cl-edit .clchk{display:none}
+.cl-edit .cledit{display:block}
+.cl-edit .cldel{display:inline-flex}
+.cl-edit .claddrow{display:flex}
+.cl-edit.cl-hide .clitem.done{display:flex}
+.cl-editing{outline:2px dashed var(--ocean);outline-offset:4px;border-radius:14px}
 @media print{
   body *{visibility:hidden}
   #print-root,#print-root *{visibility:visible}
@@ -401,6 +410,7 @@ footer a{color:var(--muted)}
   <div class="progress-track"><div class="progress-fill" id="clbar"></div></div>
   <span class="progress-lbl" id="cllbl">0 / 0 listos</span>
   <label class="cl-toggle"><input type="checkbox" id="clHide"> Ocultar los listos</label>
+  <button class="progress-reset" id="clEdit" type="button">✏️ Editar</button>
   <button class="progress-reset" id="clReset" type="button">Reiniciar</button>
   <button class="progress-reset" id="clRestore" type="button">Recuperar borrados</button>
   <button class="progress-reset" id="clPrint" type="button">🖨️ Imprimir</button>
@@ -724,9 +734,9 @@ footer a{color:var(--muted)}
     get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},
     set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
   };
-  var K={checked:'gb26:cl:checked',deleted:'gb26:cl:deleted',custom:'gb26:cl:custom',collapsed:'gb26:cl:collapsed',hide:'gb26:cl:hide'};
+  var K={checked:'gb26:cl:checked',deleted:'gb26:cl:deleted',custom:'gb26:cl:custom',collapsed:'gb26:cl:collapsed',hide:'gb26:cl:hide',over:'gb26:cl:over'};
   var checked=LS.get(K.checked,{}), deleted=LS.get(K.deleted,{}), custom=LS.get(K.custom,{}),
-      collapsed=LS.get(K.collapsed,{}), hideDone=LS.get(K.hide,false);
+      collapsed=LS.get(K.collapsed,{}), hideDone=LS.get(K.hide,false), overrides=LS.get(K.over,{});
 
   var GROUPS=[
    {g:'🎒 Equipaje',cats:[
@@ -789,8 +799,9 @@ footer a{color:var(--muted)}
 
   function findCat(id){for(var i=0;i<GROUPS.length;i++){var cs=GROUPS[i].cats;for(var j=0;j<cs.length;j++)if(cs[j].id===id)return cs[j];}return null;}
   function itemsOf(cat){
-    var base=cat.items.filter(function(it){return !deleted[it[0]];}).map(function(it){return {id:it[0],t:it[1]};});
-    return base.concat(custom[cat.id]||[]);
+    var base=cat.items.filter(function(it){return !deleted[it[0]];}).map(function(it){return {id:it[0],t:(overrides[it[0]]||it[1])};});
+    var cust=(custom[cat.id]||[]).map(function(x){return {id:x.id,t:(overrides[x.id]||x.t)};});
+    return base.concat(cust);
   }
   function counts(cat){var it=itemsOf(cat),d=it.filter(function(i){return checked[i.id];}).length;return {done:d,total:it.length};}
 
@@ -819,14 +830,23 @@ footer a{color:var(--muted)}
       LS.set(K.checked,checked); row.classList.toggle('done',cb.checked);
       updateHeader(cat); updateOverall();
     });
+    var edit=document.createElement('input'); edit.type='text'; edit.className='cledit'; edit.value=it.t; edit.maxLength=80; edit.setAttribute('aria-label','Editar elemento');
+    function saveEdit(){
+      var v=edit.value.trim(); if(!v){edit.value=it.t;return;}
+      it.t=v; txt.textContent=v; overrides[it.id]=v; LS.set(K.over,overrides);
+    }
+    edit.addEventListener('blur',saveEdit);
+    edit.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();edit.blur();}});
     var del=document.createElement('button'); del.type='button'; del.className='cldel'; del.title='Eliminar'; del.textContent='×';
     del.addEventListener('click',function(){
+      if(!confirm('¿Eliminar «'+it.t+'»?'))return;
       if(/^c\d/.test(it.id)){custom[cat.id]=(custom[cat.id]||[]).filter(function(x){return x.id!==it.id;}); LS.set(K.custom,custom);}
       else{deleted[it.id]=1; LS.set(K.deleted,deleted);}
+      if(overrides[it.id]){delete overrides[it.id]; LS.set(K.over,overrides);}
       delete checked[it.id]; LS.set(K.checked,checked);
       row.parentNode.removeChild(row); updateHeader(cat); updateOverall();
     });
-    row.appendChild(lab); row.appendChild(del);
+    row.appendChild(lab); row.appendChild(edit); row.appendChild(del);
     return row;
   }
 
@@ -887,6 +907,12 @@ footer a{color:var(--muted)}
     deleted={}; LS.set(K.deleted,deleted); render();
   });
   document.getElementById('clPrint').addEventListener('click',function(){window.print();});
+  var editBtn=document.getElementById('clEdit');
+  if(editBtn) editBtn.addEventListener('click',function(){
+    var on=host.classList.toggle('cl-edit');
+    host.classList.toggle('cl-editing',on);
+    editBtn.textContent=on?'✓ Listo':'✏️ Editar';
+  });
 })();
 </script>
 </body>
