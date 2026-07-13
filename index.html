@@ -30,9 +30,15 @@ section{scroll-margin-top:78px}
 
 /* ---- sticky nav ---- */
 .nav{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.nav-inner{max-width:1120px;margin:auto;display:flex;align-items:center;gap:14px;padding:10px 20px;overflow-x:auto}
+.nav-top{max-width:1120px;margin:auto;display:flex;align-items:center;gap:10px;padding:8px 20px}
 .nav-brand{font-family:'Fraunces',serif;font-weight:700;color:var(--ocean-deep);white-space:nowrap;font-size:15px}
-.nav-pills{display:flex;gap:6px;margin-left:auto}
+.nav-days{font-weight:700;color:var(--ocean-deep);font-size:13px;white-space:nowrap}
+.nav-status{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42vw}
+.nav-btn{flex:none;border:1px solid var(--line);background:var(--soft);border-radius:9px;padding:5px 9px;font-size:14px;cursor:pointer;line-height:1}
+.nav-btn:hover{background:#fff;border-color:var(--ocean)}
+.nav-pills{max-width:1120px;margin:auto;display:flex;gap:6px;padding:0 20px 8px;overflow-x:auto}
+.nav-bar{height:4px;background:var(--soft)}
+.nav-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--ocean));transition:width .35s}
 .nav-pills a{display:inline-flex;flex-direction:column;align-items:center;min-width:38px;padding:4px 8px;border-radius:10px;background:var(--soft);border:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:600;line-height:1.1}
 .nav-pills a b{color:var(--ocean-deep);font-size:14px}
 .nav-pills a:hover{text-decoration:none;background:#fff;border-color:var(--ocean);color:var(--ocean)}
@@ -235,20 +241,25 @@ footer a{color:var(--muted)}
 <body>
 
 <nav class="nav">
-  <div class="nav-inner">
+  <div class="nav-top">
     <span class="nav-brand">🚐 O Grove → Sant Cugat</span>
-    <div class="nav-pills">
-      <a href="#d1" data-nav="d1"><b>1</b>mar</a>
-      <a href="#d2" data-nav="d2"><b>2</b>mié</a>
-      <a href="#d3" data-nav="d3"><b>3</b>jue</a>
-      <a href="#d4" data-nav="d4"><b>4</b>vie</a>
-      <a href="#d5" data-nav="d5"><b>5</b>sáb</a>
-      <a href="#d6" data-nav="d6"><b>6</b>dom</a>
-      <a href="#d7" data-nav="d7"><b>7</b>lun</a>
-      <a href="#d8" data-nav="d8"><b>8</b>mar</a>
-      <a href="#d9" data-nav="d9"><b>9</b>mié</a>
-    </div>
+    <span class="nav-days" id="proglbl">0 / 9 días</span>
+    <span class="nav-status" id="syncStatus"></span>
+    <button class="nav-btn" id="syncBtn" type="button" title="Sincronizar ahora">🔄</button>
+    <button class="nav-btn" id="resetBtn" type="button" title="Reiniciar los días marcados">↺</button>
   </div>
+  <div class="nav-pills">
+    <a href="#d1" data-nav="d1"><b>1</b>mar</a>
+    <a href="#d2" data-nav="d2"><b>2</b>mié</a>
+    <a href="#d3" data-nav="d3"><b>3</b>jue</a>
+    <a href="#d4" data-nav="d4"><b>4</b>vie</a>
+    <a href="#d5" data-nav="d5"><b>5</b>sáb</a>
+    <a href="#d6" data-nav="d6"><b>6</b>dom</a>
+    <a href="#d7" data-nav="d7"><b>7</b>lun</a>
+    <a href="#d8" data-nav="d8"><b>8</b>mar</a>
+    <a href="#d9" data-nav="d9"><b>9</b>mié</a>
+  </div>
+  <div class="nav-bar"><div class="nav-bar-fill" id="progbar"></div></div>
 </nav>
 
 <header class="hero">
@@ -271,16 +282,6 @@ footer a{color:var(--muted)}
 
 <section class="box warn">
   <b>⚠️ Confirmá siempre:</b> el acceso y la pernocta con la caravana enganchada, que se pueda desenganchar, lo de los perros, el largo total y la maniobra — sobre todo en Parking A575, Covadonga y Txingudi.
-</section>
-
-<!-- ============ PROGRESO ============ -->
-<section class="box progress-box">
-  <span style="font-size:22px">✅</span>
-  <div class="progress-track"><div class="progress-fill" id="progbar"></div></div>
-  <span class="progress-lbl" id="proglbl">0 / 9 días listos</span>
-  <button class="progress-reset" id="resetBtn" type="button">Reiniciar</button>
-  <button class="progress-reset" id="syncBtn" type="button">🔄 Sincronizar</button>
-  <span class="progress-lbl" id="syncStatus" style="font-weight:600;color:var(--muted);font-size:13px"></span>
 </section>
 
 <!-- ============ CALENDARIO ============ -->
